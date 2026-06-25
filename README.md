@@ -24,31 +24,31 @@ A RISC-V RV32I processor implementation on FPGA, designed as a master's thesis p
 
 ## Repository Structure
 
-RISC-V-CPU/
-├── .gitignore
-├── README.md
-├── LICENSE
-├── rtl/
-│   ├── alu.sv
-│   ├── regfile.sv
-│   ├── imm_gen.sv
-│   ├── controller.sv
-│   ├── datapath.sv
-│   └── cpu.sv
-├── sim/
-│   ├── alu_tb.sv
-│   ├── regfile_tb.sv
-│   ├── cpu_tb.sv
-│   └── test_programs/
-│       └── program1.hex
-├── vivado/
-│   └── basys3.xdc
-├── docs/
-│   ├── design.md
-│   ├── isa_reference.md
-│   └── architecture.md
-└── scripts/
-    └── run_sim.sh
+RISC-V-CPU/\
+├── .gitignore\
+├── README.md\
+├── LICENSE\
+├── rtl/\
+│   ├── alu.sv\
+│   ├── regfile.sv\
+│   ├── imm_gen.sv\
+│   ├── controller.sv\
+│   ├── datapath.sv\
+│   └── cpu.sv\
+├── sim/\
+│   ├── alu_tb.sv\
+│   ├── regfile_tb.sv\
+│   ├── cpu_tb.sv\
+│   └── test_programs/\
+│       └── program1.hex\
+├── vivado/\
+│   └── basys3.xdc\
+├── docs/\
+│   ├── design.md\
+│   ├── isa_reference.md\
+│   └── architecture.md\
+└── scripts/\
+    └── run_sim.sh\
 
 ## Building & Simulation
 
@@ -81,9 +81,9 @@ See [docs/isa_reference.md](docs/isa_reference.md) for RISC-V instruction set re
 
 ## Author
 
-Christian Watts | B.S. in Electrical Engineering from The University of Alabama | 
+Christian Watts\
+B.S. in Electrical Engineering from The University of Alabama\
 Master's Student, Electrical Engineering at UT San Antonio
-
 ## License
 
 MIT License - See [LICENSE](LICENSE) file
