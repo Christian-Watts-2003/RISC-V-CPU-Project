@@ -81,9 +81,8 @@ See [docs/isa_reference.md](docs/isa_reference.md) for RISC-V instruction set re
 
 ## Author
 
-Christian Watts, B.S. in Electrical Engineering from The University of Alabama
-Master's Student, Electrical Engineering
-UT San Antonio
+Christian Watts | B.S. in Electrical Engineering from The University of Alabama | 
+Master's Student, Electrical Engineering at UT San Antonio
 
 ## License
 
