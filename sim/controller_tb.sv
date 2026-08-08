@@ -50,5 +50,45 @@ module controller_tb;
         end
     endtask
 
+    initial begin
+        opcode = 7'b0110011; funct3 = 3'b000; funct7 = 7'b0000000; // ADD
+        #1 check("ADD", 4'b0000, 1, 0, 0, 3'b000, 0, 0, 0);
+
+        opcode = 7'b0110011; funct3 = 3'b000; funct7 = 7'b0100000; // SUB
+        #1 check("SUB", 4'b0001, 1, 0, 0, 3'b000, 0, 0, 0);
+
+        // ========== I-type ==========
+        opcode = 7'b0010011; funct3 = 3'b000; funct7 = 7'b0000000; // ADDI
+        #1 check("ADDI", 4'b0000, 1, 0, 0, 3'b000, 0, 0, 1);
+
+        // ========== Load ==========
+        opcode = 7'b0000011; funct3 = 3'b010; funct7 = 7'b0000000; // LW
+        #1 check("LW", 4'b0000, 1, 1, 0, 3'b000, 0, 0, 1);
+
+        // ========== Store ==========
+        opcode = 7'b0100011; funct3 = 3'b010; funct7 = 7'b0000000; // SW
+        #1 check("SW", 4'b0000, 0, 0, 1, 3'b001, 0, 0, 1);
+
+        // ========== Branch ==========
+        opcode = 7'b1100011; funct3 = 3'b000; funct7 = 7'b0000000; // BEQ
+        #1 check("BEQ", 4'b0000, 0, 0, 0, 3'b010, 1, 0, 0);
+
+        // ========== JAL ==========
+        opcode = 7'b1101111; funct3 = 3'b000; funct7 = 7'b0000000;
+        #1 check("JAL", 4'b0000, 1, 0, 0, 3'b100, 0, 1, 0);
+
+        // ========== JALR ==========
+        opcode = 7'b1100111; funct3 = 3'b000; funct7 = 7'b0000000;
+        #1 check("JALR", 4'b0000, 1, 0, 0, 3'b000, 0, 1, 1);
+
+        // ========== LUI / AUIPC ==========
+        opcode = 7'b0110111; funct3 = 3'b000; funct7 = 7'b0000000; // LUI
+        #1 check("LUI", 4'b0000, 1, 0, 0, 3'b011, 0, 0, 0);
+
+        opcode = 7'b0010111; funct3 = 3'b000; funct7 = 7'b0000000; // AUIPC
+        #1 check("AUIPC", 4'b0000, 1, 0, 0, 3'b011, 0, 0, 0);
+
+        $finish;
+    end
         
 endmodule
