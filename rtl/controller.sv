@@ -16,6 +16,8 @@ module controller (
     output logic       branch,
     output logic       jump,
     output logic       alu_src   // 0 = rs2, 1 = immediate
+    output logic       is_muldiv,
+    output logic [2:0] muldiv_op
 );
 
     // Safe defaults (prevents latches)
@@ -84,6 +86,11 @@ module controller (
                 imm_src   = 3'b011;
             end
 
+            if (funct7 == 7'b0000001) begin
+                is_muldiv = 1'b1;
+                muldiv_op = funct3;           // Use funct3 directly as the operation select
+            end
+            
             default: begin
                 // Illegal instruction — all signals stay at default (0)
             end
