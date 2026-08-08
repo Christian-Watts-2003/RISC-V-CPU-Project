@@ -30,6 +30,8 @@ module controller (
         branch     = 1'b0;
         jump       = 1'b0;
         alu_src    = 1'b0;
+        is_muldiv  = 1'b0;
+        muldiv_op  = 3'b000;
 
         case (opcode)
             7'b0110011: begin // R-type
