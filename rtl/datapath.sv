@@ -68,8 +68,22 @@ module datapath (
         .illegal_op (illegal_op)
     );
 
-    // MulDiv placeholder
+    // MulDiv Integration
+    wire [31:0] muldiv_result;
+    wire        muldiv_valid;
 
+    muldiv datapath_muldiv (
+        .clk        (clk),
+        .reset      (reset),
+        .start      (is_muldiv),
+        .muldiv_op  (muldiv_op),
+        .a          (reg_data1),
+        .b          (reg_data2),
+        .result     (muldiv_result),
+        .valid      (muldiv_valid)
+    );
+
+    // Writeback Mux 
     wire [31:0] pc_plus_4 = pc + 4;
 
     always_comb begin
@@ -77,11 +91,14 @@ module datapath (
             writeback_data = pc_plus_4;
         end else if (mem_read) begin
             writeback_data = mem_read_data;
+        end else if (is_muldiv) begin
+            writeback_data = muldiv_result;     // RV32M result
         end else begin
             writeback_data = alu_result;
         end
     end
 
+    // PC Logic
     wire [31:0] branch_target = pc + imm;
     wire [31:0] jal_target    = pc + imm;
     wire [31:0] jalr_target   = reg_data1 + imm;
@@ -107,6 +124,7 @@ module datapath (
             pc <= pc_next;
     end
 
+    // Memory interface
     assign mem_addr       = alu_result;
     assign mem_write_data = reg_data2;
 
