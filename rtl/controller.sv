@@ -1,7 +1,6 @@
 /**
  * Control Unit
- * Decodes RV32I instructions and generates control signals
- * for the datapath.
+ * Decodes RV32I instructions and generates control signals for the datapath.
  */
 
 module controller (
@@ -15,12 +14,11 @@ module controller (
     output logic [2:0] imm_src,
     output logic       branch,
     output logic       jump,
-    output logic       alu_src,   // 0 = rs2, 1 = immediate
+    output logic       alu_src,
     output logic       is_muldiv,
     output logic [2:0] muldiv_op
 );
 
-    // Safe defaults (prevents latches)
     always_comb begin
         alu_op     = 4'b0000;
         reg_write  = 1'b0;
@@ -36,13 +34,12 @@ module controller (
         case (opcode)
             7'b0110011: begin // R-type
                 reg_write = 1'b1;
-                alu_src   = 1'b0; // use rs2
-                // alu_op set below
+                alu_src   = 1'b0;
             end
 
-            7'b0010011: begin // I-type (immediate)
+            7'b0010011: begin // I-type
                 reg_write = 1'b1;
-                alu_src   = 1'b1; // use immediate
+                alu_src   = 1'b1;
                 imm_src   = 3'b000;
             end
 
@@ -87,22 +84,18 @@ module controller (
                 reg_write = 1'b1;
                 imm_src   = 3'b011;
             end
-            
-            default: begin
-                // Illegal instruction - all signals stay at default (0)
-            end
+
+            default: ;
         endcase
-        
+
         if (funct7 == 7'b0000001) begin
             is_muldiv = 1'b1;
-            muldiv_op = funct3;           // Use funct3 directly as the operation select
+            muldiv_op = funct3;
         end
 
-        // ALU operation decoding (R-type and I-type)
         if (opcode == 7'b0110011) begin
-
             if (funct7 == 7'b0000001) begin
-                // RV32M instructions
+                // RV32M
                 case (funct3)
                     3'b000: alu_op = 4'b1001; // MUL
                     3'b001: alu_op = 4'b1010; // MULH
@@ -115,7 +108,7 @@ module controller (
                     default: alu_op = 4'b0000;
                 endcase
             end else begin
-                // Normal RV32I R-type
+                // RV32I R-type
                 case (funct3)
                     3'b000: alu_op = (funct7[5]) ? 4'b0001 : 4'b0000; // SUB / ADD
                     3'b001: alu_op = 4'b0110; // SLL
