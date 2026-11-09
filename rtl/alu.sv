@@ -9,6 +9,7 @@ module alu (
 );
 
     always_comb begin
+        // Set safe defaults so every output has a value for every operation.
         illegal_op = 1'b0;
         result     = 32'b0;
 
@@ -23,12 +24,14 @@ module alu (
             4'b0111: result = a >> b[4:0];              // SRL
             4'b1000: result = $signed(a) >>> b[4:0];    // SRA
             default: begin
+                // An unsupported operation returns zero and raises a flag.
                 result     = 32'b0;
                 illegal_op = 1'b1;
             end
         endcase
     end
 
+    // The branch logic can use this flag to check whether the result is zero.
     assign zero = (result == 32'b0);
 
 endmodule
