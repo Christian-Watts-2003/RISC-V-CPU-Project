@@ -1,9 +1,26 @@
 /**
  * OR-gated execution-result selection variant.
  *
- * The ALU and M-extension result buses are independently masked with mutually
- * exclusive enables, then combined with a bitwise OR. This replaces the
- * execution-result mux while preserving the original datapath interface.
+ * Optimization rationale and relationship to the paper:
+ * - The design goal discussed in the paper is to shorten the instruction's
+ *   combinational control/data path by exposing useful decode information early
+ *   and allowing independent datapath work to proceed in parallel.
+ * - This variant applies that idea at the execution-result selection point:
+ *   ALU and M-extension results are computed on separate combinational paths,
+ *   then independently masked with mutually exclusive enables and combined by
+ *   bitwise OR. This replaces the priority selection between those two results
+ *   with one-hot gating; jump and load writeback choices remain higher-level
+ *   writeback selections, as in the baseline.
+ * - `use_muldiv` is a small combinational predecode from the current instruction
+ *   fields plus the existing control input. It qualifies the M-extension path
+ *   before selection and prevents an unrelated opcode/funct7 combination from
+ *   enabling it. This is not a new registered predecode pipeline stage and
+ *   does not add a cycle or change the external interface.
+ * - Keep this module separate from the baseline `datapath` so identical tests
+ *   can compare functionally equivalent implementations. The OR-gated form is
+ *   an architectural experiment inspired by the paper's parallelism/timing
+ *   motivation; whether it improves FPGA timing or resources must be confirmed
+ *   after synthesis and timing analysis for the target device and constraints.
  */
 module datapath_or (
     input  logic        clk,
@@ -81,8 +98,11 @@ module datapath_or (
         .illegal_op (illegal_op)
     );
 
-    // Only an R-type instruction with the M-extension funct7 selects MULDIV.
-    // This qualification also prevents unrelated funct7 bits activating it.
+    // Early combinational qualification for the parallel M-extension path.
+    // It uses fields already present in the instruction; it is not a pipeline
+    // register/stage, so it preserves the baseline single-cycle timing model.
+    // The controller's `is_muldiv` is retained as an enable, while the opcode
+    // and funct7 checks make the local path selection self-qualifying.
     assign use_muldiv = is_muldiv &&
                         (instruction[6:0] == 7'b0110011) &&
                         (instruction[31:25] == 7'b0000001);
@@ -98,18 +118,29 @@ module datapath_or (
         .valid      (muldiv_valid)
     );
 
-    // One-hot, mutually exclusive enables: exactly one result bus contributes.
+    // Parallel-result selection (the main OR-gating experiment):
+    // 1. The ALU and M-extension unit produce candidate results independently.
+    // 2. Their decode enables are complementary, so only the selected bus is
+    //    allowed through; the other is forced to zero.
+    // 3. OR combines the masked buses without allowing the unselected unit to
+    //    contaminate the result. This is logically equivalent to a 2:1 mux.
+    // The enables must remain mutually exclusive for that equivalence to hold.
     assign muldiv_result_enable = use_muldiv;
     assign alu_result_enable    = ~use_muldiv;
     assign alu_selected         = alu_result    & {32{alu_result_enable}};
     assign muldiv_selected      = muldiv_result & {32{muldiv_result_enable}};
     assign execution_result     = alu_selected | muldiv_selected;
 
-    assign pc_plus_4    = pc + 32'd4;
+    // These address/control calculations are kept independent of the result
+    // selection to preserve parallel combinational evaluation of next-PC paths.
+    assign pc_plus_4     = pc + 32'd4;
     assign branch_target = pc + imm;
     assign jal_target    = pc + imm;
     assign jalr_target   = reg_data1 + imm;
 
+    // The existing writeback priority is deliberately retained: link address
+    // for jumps, memory data for loads, otherwise the OR-selected execution
+    // result. This isolates the optimization being tested from unrelated muxes.
     always_comb begin
         if (jump)
             writeback_data = pc_plus_4;
@@ -119,6 +150,8 @@ module datapath_or (
             writeback_data = execution_result;
     end
 
+    // Branch/JAL/JALR target candidates are calculated above in parallel;
+    // this control selection chooses the architecturally required next PC.
     always_comb begin
         if (branch && zero)
             pc_next = branch_target;
