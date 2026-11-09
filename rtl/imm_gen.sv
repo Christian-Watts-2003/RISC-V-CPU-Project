@@ -16,9 +16,11 @@ module imm_gen (
 );
 
     always_comb begin
+        // Each format gathers immediate bits from different instruction positions.
         case (imm_src)
             3'b000: imm_value = {{20{instruction[31]}}, instruction[31:20]};                    // I-type
             3'b001: imm_value = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]}; // S-type
+            // B- and J-type immediates encode their lowest bit as zero.
             3'b010: imm_value = {{20{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0}; // B-type
             3'b011: imm_value = {instruction[31:12], 12'b0};                                    // U-type
             3'b100: imm_value = {{12{instruction[31]}}, instruction[31], instruction[19:12], instruction[20], instruction[30:21], 1'b0}; // J-type
