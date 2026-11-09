@@ -17,6 +17,7 @@ module muldiv (
     logic        [63:0] prod_unsigned;
 
     always_comb begin
+        // Keep both forms so the high-half multiply instructions can use the right sign.
         prod_signed   = $signed(a) * $signed(b);
         prod_unsigned = a * b;
 
@@ -29,6 +30,7 @@ module muldiv (
 
             // Division
             3'b100: begin // DIV (signed)
+                // RISC-V defines these results for division by zero and signed overflow.
                 if (b == 0)
                     result = 32'hFFFFFFFF;
                 else if (a == 32'h80000000 && b == 32'hFFFFFFFF)
@@ -55,6 +57,7 @@ module muldiv (
         endcase
     end
 
+    // This simple version marks the result valid whenever an operation is requested.
     assign valid = start;   // Placeholder
 
 endmodule
