@@ -14,14 +14,17 @@ module regfile (
 
     logic [31:0] registers [32];
 
+    // Register x0 always reads as zero, regardless of what is stored in its slot.
     assign read_data1 = (rs1 == 5'b0) ? 32'b0 : registers[rs1];
     assign read_data2 = (rs2 == 5'b0) ? 32'b0 : registers[rs2];
 
+    // Writes happen on the rising clock edge, and writes to x0 are ignored.
     always_ff @(posedge clk) begin
         if (reg_write && (rd != 5'b0))
             registers[rd] <= write_data;
     end
 
+    // Start with all registers cleared so simulation begins from a known state.
     initial begin
         for (int i = 0; i < 32; i++)
             registers[i] = 32'b0;
