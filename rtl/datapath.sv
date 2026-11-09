@@ -26,6 +26,7 @@ module datapath (
     output logic        zero
 );
 
+    // These fields identify the source registers, destination, and instruction type.
     wire [4:0] rs1    = instruction[19:15];
     wire [4:0] rs2    = instruction[24:20];
     wire [4:0] rd     = instruction[11:7];
@@ -68,7 +69,7 @@ module datapath (
         .illegal_op (illegal_op)
     );
 
-    // MulDiv Integration
+    // The multiply/divide unit uses the two register values as its operands.
     wire [31:0] muldiv_result;
     wire        muldiv_valid;
 
@@ -83,7 +84,7 @@ module datapath (
         .valid      (muldiv_valid)
     );
 
-    // Writeback Mux 
+    // Choose which result will be written back to the destination register.
     wire [31:0] pc_plus_4 = pc + 4;
 
     always_comb begin
@@ -98,7 +99,7 @@ module datapath (
         end
     end
 
-    // PC Logic
+    // Work out the possible next addresses for branches and jumps.
     wire [31:0] branch_target = pc + imm;
     wire [31:0] jal_target    = pc + imm;
     wire [31:0] jalr_target   = reg_data1 + imm;
@@ -106,9 +107,11 @@ module datapath (
     wire [31:0] pc_next;
 
     always_comb begin
+        // Branches take the target when the ALU reports a zero result.
         if (branch && zero) begin
             pc_next = branch_target;
         end else if (jump && alu_src) begin
+            // JALR uses a register-relative target and clears its lowest bit.
             pc_next = jalr_target & ~32'b1;
         end else if (jump) begin
             pc_next = jal_target;
@@ -117,6 +120,7 @@ module datapath (
         end
     end
 
+    // The PC changes on the clock edge, or returns to zero while reset is active.
     always_ff @(posedge clk) begin
         if (reset)
             pc <= 32'b0;
@@ -124,7 +128,7 @@ module datapath (
             pc <= pc_next;
     end
 
-    // Memory interface
+    // The ALU supplies the memory address; stores send the second register value.
     assign mem_addr       = alu_result;
     assign mem_write_data = reg_data2;
 
