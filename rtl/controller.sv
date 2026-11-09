@@ -20,6 +20,7 @@ module controller (
 );
 
     always_comb begin
+        // Start with no side effects; each recognized instruction enables what it needs.
         alu_op     = 4'b0000;
         reg_write  = 1'b0;
         mem_read   = 1'b0;
@@ -31,6 +32,7 @@ module controller (
         is_muldiv  = 1'b0;
         muldiv_op  = 3'b000;
 
+        // The opcode picks the instruction family and its main datapath controls.
         case (opcode)
             7'b0110011: begin // R-type
                 reg_write = 1'b1;
@@ -88,11 +90,13 @@ module controller (
             default: ;
         endcase
 
+        // RV32M instructions share the R-type opcode; funct7 marks the M extension.
         if (funct7 == 7'b0000001) begin
             is_muldiv = 1'b1;
             muldiv_op = funct3;
         end
 
+        // For R-type instructions, funct3 and funct7 select the ALU operation.
         if (opcode == 7'b0110011) begin
             if (funct7 == 7'b0000001) begin
                 // RV32M
