@@ -13,79 +13,68 @@ module rv32im_core #(
     input  wire [31:0] dmem_rdata
 );
 
-    // Pipeline state placeholders for the five-stage RV32IM design.
-    // The stage registers are named to match the specification in docs/SPEC.md.
-    reg [31:0] pc;
-    reg [31:0] if_id_pc;
-    reg [31:0] if_id_instr;
-    reg [31:0] id_ex_pc;
-    reg [31:0] id_ex_instr;
-    reg [31:0] ex_mem_pc;
-    reg [31:0] ex_mem_instr;
-    reg [31:0] mem_wb_pc;
-    reg [31:0] mem_wb_instr;
+    wire [31:0] pc;
+    wire        if_id_valid;
+    wire [31:0] if_id_pc;
+    wire [31:0] if_id_instr;
 
-    reg if_id_valid;
-    reg id_ex_valid;
-    reg ex_mem_valid;
-    reg mem_wb_valid;
-
-    // These are placeholders for the later hazard and forwarding logic.
+    // Fetch controls are tied inactive until the hazard/branch units are
+    // integrated. The fetch unit already provides their required hold, flush,
+    // and redirect interface for later steps.
     wire fetch_hold = 1'b0;
-    wire decode_stall = 1'b0;
+    wire ifid_hold = 1'b0;
+    wire ifid_flush = 1'b0;
+    wire fetch_redirect = 1'b0;
+    wire [31:0] fetch_redirect_pc = 32'b0;
 
-    // Fetch stage interface.
+    fetch_unit u_fetch (
+        .clk(clk),
+        .rst(rst),
+        .imem_rdata(imem_rdata),
+        .hold_pc(fetch_hold),
+        .hold_ifid(ifid_hold),
+        .flush_ifid(ifid_flush),
+        .redirect(fetch_redirect),
+        .redirect_pc(fetch_redirect_pc),
+        .pc(pc),
+        .ifid_valid(if_id_valid),
+        .ifid_pc(if_id_pc),
+        .ifid_instr(if_id_instr)
+    );
+
     assign imem_addr = pc;
     assign dmem_addr = 32'b0;
     assign dmem_wdata = 32'b0;
     assign dmem_wstrb = 4'b0000;
     assign dmem_re = 1'b0;
 
+    // Later pipeline registers are placeholders until decode/execute/MEM/WB
+    // integration. They preserve the IF/ID payload shape for the next steps.
+    reg [31:0] id_ex_pc;
+    reg [31:0] id_ex_instr;
+    reg        id_ex_valid;
+    reg [31:0] ex_mem_pc;
+    reg [31:0] ex_mem_instr;
+    reg        ex_mem_valid;
+    reg [31:0] mem_wb_pc;
+    reg [31:0] mem_wb_instr;
+    reg        mem_wb_valid;
+
     always @(posedge clk) begin
         if (rst) begin
-            pc          <= 32'b0;
-            if_id_pc    <= 32'b0;
-            if_id_instr <= 32'b0;
-            id_ex_pc    <= 32'b0;
-            id_ex_instr <= 32'b0;
-            ex_mem_pc   <= 32'b0;
-            ex_mem_instr<= 32'b0;
-            mem_wb_pc   <= 32'b0;
-            mem_wb_instr<= 32'b0;
-
-            if_id_valid <= 1'b0;
             id_ex_valid <= 1'b0;
-            ex_mem_valid<= 1'b0;
-            mem_wb_valid<= 1'b0;
+            ex_mem_valid <= 1'b0;
+            mem_wb_valid <= 1'b0;
         end else begin
-            // Fetch stage: program counter increments by four in normal operation.
-            if (!fetch_hold)
-                pc <= pc + 32'd4;
-
-            // IF/ID capture stage.
-            if (!decode_stall) begin
-                if_id_pc    <= pc;
-                if_id_instr <= imem_rdata;
-                if_id_valid <= 1'b1;
-            end else begin
-                if_id_valid <= 1'b0;
-            end
-
-            // Pipeline propagation placeholders. These are intentionally simple and
-            // will be replaced by real decode/execute/memory/writeback logic in
-            // subsequent implementation steps.
-            id_ex_pc    <= if_id_pc;
+            id_ex_pc <= if_id_pc;
             id_ex_instr <= if_id_instr;
             id_ex_valid <= if_id_valid;
-
-            ex_mem_pc   <= id_ex_pc;
-            ex_mem_instr<= id_ex_instr;
-            ex_mem_valid<= id_ex_valid;
-
-            mem_wb_pc   <= ex_mem_pc;
-            mem_wb_instr<= ex_mem_instr;
-            mem_wb_valid<= ex_mem_valid;
+            ex_mem_pc <= id_ex_pc;
+            ex_mem_instr <= id_ex_instr;
+            ex_mem_valid <= id_ex_valid;
+            mem_wb_pc <= ex_mem_pc;
+            mem_wb_instr <= ex_mem_instr;
+            mem_wb_valid <= ex_mem_valid;
         end
     end
-
 endmodule
