@@ -73,7 +73,7 @@ module single_cycle_tb;
         dut.u_memory.imem[19] = enc_i(1,0,3'b000,15,7'b0010011);   // skipped
         dut.u_memory.imem[20] = enc_j(8,16);                       // jal x16,+8
         dut.u_memory.imem[21] = enc_i(2,0,3'b000,15,7'b0010011);   // skipped
-        dut.u_memory.imem[22] = enc_i(92,0,3'b000,17,7'b0010011);  // addi x17,x0,92
+        dut.u_memory.imem[22] = enc_i(96,0,3'b000,17,7'b0010011);
         dut.u_memory.imem[23] = enc_i(0,17,3'b000,18,7'b1100111); // jalr x18,x17,0 -> word 23? target address 92
         dut.u_memory.imem[24] = enc_r(1,9,8,3'b000,19);            // mul x19,x8,x9
         dut.u_memory.imem[25] = enc_r(1,9,8,3'b001,20);            // mulh x20,x8,x9
@@ -86,7 +86,7 @@ module single_cycle_tb;
         dut.u_memory.imem[32] = enc_j(0,0);                         // stop: jal x0,0
 
         repeat (2) @(posedge clk);
-        reset=0;
+        @(negedge clk) reset=0;
         repeat (45) @(posedge clk);
         #1;
 
