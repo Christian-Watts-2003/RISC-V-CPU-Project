@@ -18,9 +18,6 @@ module rv32im_core #(
     wire [31:0] if_id_pc;
     wire [31:0] if_id_instr;
 
-    // Fetch controls are tied inactive until the hazard/branch units are
-    // integrated. The fetch unit already provides their required hold, flush,
-    // and redirect interface for later steps.
     wire fetch_hold = 1'b0;
     wire ifid_hold = 1'b0;
     wire ifid_flush = 1'b0;
@@ -42,14 +39,29 @@ module rv32im_core #(
         .ifid_instr(if_id_instr)
     );
 
+    // Register file placeholder wiring for step 3. The stage decode is not yet
+    // implemented, but the register file interface matches the downstream
+    // pipeline requirements.
+    wire [31:0] regfile_r1;
+    wire [31:0] regfile_r2;
+    regfile u_regfile (
+        .clk(clk),
+        .rst(rst),
+        .rs1(5'b0),
+        .rs2(5'b0),
+        .rd(5'b0),
+        .write_data(32'b0),
+        .reg_write(1'b0),
+        .read_data1(regfile_r1),
+        .read_data2(regfile_r2)
+    );
+
     assign imem_addr = pc;
     assign dmem_addr = 32'b0;
     assign dmem_wdata = 32'b0;
     assign dmem_wstrb = 4'b0000;
     assign dmem_re = 1'b0;
 
-    // Later pipeline registers are placeholders until decode/execute/MEM/WB
-    // integration. They preserve the IF/ID payload shape for the next steps.
     reg [31:0] id_ex_pc;
     reg [31:0] id_ex_instr;
     reg        id_ex_valid;
