@@ -39,8 +39,16 @@ module rv32im_core #(
         .ifid_instr(if_id_instr)
     );
 
-    // Step 3: register file placeholder wiring. Decode is not yet attached, but
-    // the register file API matches the downstream pipeline requirement.
+    // Step 4: immediate generator for I/S/B/U/J formats, wired to the IF/ID
+    // captured instruction. This value is available for the later decode stage.
+    wire [31:0] imm_value;
+    wire [2:0]  imm_src = 3'b000;
+    imm_gen u_imm_gen (
+        .instruction(if_id_instr),
+        .imm_src(imm_src),
+        .imm_value(imm_value)
+    );
+
     wire [31:0] regfile_r1;
     wire [31:0] regfile_r2;
     regfile u_regfile (
