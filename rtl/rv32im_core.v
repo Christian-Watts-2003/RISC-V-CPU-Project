@@ -13,9 +13,8 @@ module rv32im_core #(
     input  wire [31:0] dmem_rdata
 );
 
-    // Pipeline state registers. These are placeholders for the full five-stage
-    // implementation described in docs/SPEC.md. The valid bits allow bubbles to
-    // be represented without retiring instructions.
+    // Pipeline state placeholders for the five-stage RV32IM design.
+    // The stage registers are named to match the specification in docs/SPEC.md.
     reg [31:0] pc;
     reg [31:0] if_id_pc;
     reg [31:0] if_id_instr;
@@ -26,17 +25,16 @@ module rv32im_core #(
     reg [31:0] mem_wb_pc;
     reg [31:0] mem_wb_instr;
 
-    reg        if_id_valid;
-    reg        id_ex_valid;
-    reg        ex_mem_valid;
-    reg        mem_wb_valid;
+    reg if_id_valid;
+    reg id_ex_valid;
+    reg ex_mem_valid;
+    reg mem_wb_valid;
 
-    // Placeholder hold/stall signals. These will be replaced by the hazard unit
-    // and forwarding logic in later steps.
-    wire       fetch_hold = 1'b0;
-    wire       decode_stall = 1'b0;
+    // These are placeholders for the later hazard and forwarding logic.
+    wire fetch_hold = 1'b0;
+    wire decode_stall = 1'b0;
 
-    // Core fetch address is the current PC.
+    // Fetch stage interface.
     assign imem_addr = pc;
     assign dmem_addr = 32'b0;
     assign dmem_wdata = 32'b0;
@@ -60,11 +58,11 @@ module rv32im_core #(
             ex_mem_valid<= 1'b0;
             mem_wb_valid<= 1'b0;
         end else begin
-            // IF stage: advance the PC unless the fetch stage is stalled.
+            // Fetch stage: program counter increments by four in normal operation.
             if (!fetch_hold)
                 pc <= pc + 32'd4;
 
-            // IF/ID: capture the current instruction and PC.
+            // IF/ID capture stage.
             if (!decode_stall) begin
                 if_id_pc    <= pc;
                 if_id_instr <= imem_rdata;
@@ -73,9 +71,9 @@ module rv32im_core #(
                 if_id_valid <= 1'b0;
             end
 
-            // The remaining pipeline registers are advanced as a placeholder
-            // representation of the five-stage design. Full EX/MEM/WB behavior is
-            // added in later implementation steps.
+            // Pipeline propagation placeholders. These are intentionally simple and
+            // will be replaced by real decode/execute/memory/writeback logic in
+            // subsequent implementation steps.
             id_ex_pc    <= if_id_pc;
             id_ex_instr <= if_id_instr;
             id_ex_valid <= if_id_valid;

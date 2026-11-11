@@ -1,15 +1,33 @@
-/** Archived single-cycle register file. */
+/**
+ * Register File
+ * 32 x 32-bit general-purpose registers with 2 read ports and 1 write port.
+ */
+
 module regfile (
-    input logic clk,
-    input logic [4:0] rs1, rs2, rd,
-    input logic [31:0] write_data,
-    input logic reg_write,
-    output wire [31:0] read_data1, read_data2
+    input  logic        clk,
+    input  logic [4:0]  rs1, rs2, rd,
+    input  logic [31:0] write_data,
+    input  logic        reg_write,
+    output logic [31:0] read_data1,
+    output logic [31:0] read_data2
 );
-    reg [31:0] registers [0:31];
-    assign read_data1=(rs1==0)?32'b0:registers[rs1];
-    assign read_data2=(rs2==0)?32'b0:registers[rs2];
-    always @(posedge clk) if (reg_write && rd!=0) registers[rd]<=write_data;
-    integer i;
-    initial for (i=0;i<32;i=i+1) registers[i]=0;
+
+    logic [31:0] registers [32];
+
+    // Register x0 always reads as zero, regardless of what is stored in its slot.
+    assign read_data1 = (rs1 == 5'b0) ? 32'b0 : registers[rs1];
+    assign read_data2 = (rs2 == 5'b0) ? 32'b0 : registers[rs2];
+
+    // Writes happen on the rising clock edge, and writes to x0 are ignored.
+    always_ff @(posedge clk) begin
+        if (reg_write && (rd != 5'b0))
+            registers[rd] <= write_data;
+    end
+
+    // Start with all registers cleared so simulation begins from a known state.
+    initial begin
+        for (int i = 0; i < 32; i++)
+            registers[i] = 32'b0;
+    end
+
 endmodule
