@@ -39,14 +39,12 @@ module rv32im_core #(
         .ifid_instr(if_id_instr)
     );
 
-    // Register file placeholder wiring for step 3. The stage decode is not yet
-    // implemented, but the register file interface matches the downstream
-    // pipeline requirements.
+    // Step 3: register file placeholder wiring. Decode is not yet attached, but
+    // the register file API matches the downstream pipeline requirement.
     wire [31:0] regfile_r1;
     wire [31:0] regfile_r2;
     regfile u_regfile (
         .clk(clk),
-        .rst(rst),
         .rs1(5'b0),
         .rs2(5'b0),
         .rd(5'b0),
