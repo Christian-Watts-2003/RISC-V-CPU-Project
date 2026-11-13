@@ -26,7 +26,7 @@ module single_cycle_tb;
     function automatic [31:0] enc_b(
         input integer imm, input [4:0] rs2, input [4:0] rs1, input [2:0] funct3
     );
-        enc_b={imm[12],imm[10:5],rs2,rs1,funct3,imm[4:1],imm[11],1'b0,7'b1100011};
+        enc_b = {imm[12], imm[10:5], rs2, rs1, funct3, imm[4:1], imm[11], 7'b1100011};
     endfunction
     function automatic [31:0] enc_u(input [19:0] imm, input [4:0] rd, input [6:0] opcode);
         enc_u={imm,rd,opcode};
