@@ -38,12 +38,16 @@ The rightmost eight switches select fields in every trace line:
 The selected fields are transmitted as hexadecimal values at 115200 baud,
 8-N-1. For example:
 
-  PC=00000000 INSTR=00000013 CYCLES=00000001
+  PC=00000000 INSTR=00000013 CYCLES=00000001 OP=OPIMM
 
 When sw[8] is enabled, the self-checking test image reports
 `RESULT=PASS` when it writes marker `600D600D` to data address 0, or
 `RESULT=FAIL` when it writes marker `DEADFA11`. Other instructions show
 `RESULT=----`.
+
+The trace automatically appends an opcode-class label (`OP=LUI`, `OP=AUIPC`,
+`OP=JAL`, `OP=JALR`, `OP=BRANCH`, `OP=LOAD`, `OP=STORE`, `OP=OPIMM`,
+`OP=ALU`, or `OP=ILLEGAL`) to each line.
 
 The instruction ROM is initialized from IMEM_FILE. The default path is the
 existing Basys3 test image; set the parameter or manage the HEX file in the

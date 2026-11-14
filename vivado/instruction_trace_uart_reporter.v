@@ -7,7 +7,7 @@ module instruction_trace_uart_reporter #(
     input  wire        clk,
     input  wire        rst,
     input  wire        start,
-    input  wire [8:0] field_enable,
+    input  wire [9:0] field_enable,
     input  wire [1:0] result_status,
     input  wire [31:0] pc,
     input  wire [31:0] instruction,
@@ -29,10 +29,11 @@ module instruction_trace_uart_reporter #(
     localparam [3:0] FIELD_STORES = 4'd6;
     localparam [3:0] FIELD_LDATA  = 4'd7;
     localparam [3:0] FIELD_RESULT = 4'd8;
-    localparam [3:0] FIELD_END    = 4'd9;
+    localparam [3:0] FIELD_OP     = 4'd9;
+    localparam [3:0] FIELD_END    = 4'd10;
 
     reg        active;
-    reg [8:0]  remaining_fields;
+    reg [9:0]  remaining_fields;
     reg [3:0]  field_index;
     reg [4:0]  char_index;
     reg [31:0] report_pc;
@@ -49,7 +50,7 @@ module instruction_trace_uart_reporter #(
     wire       tx_start;
 
     function [3:0] first_field;
-        input [8:0] mask;
+        input [9:0] mask;
         begin
             if (mask[0]) first_field = FIELD_PC;
             else if (mask[1]) first_field = FIELD_INSTR;
@@ -60,6 +61,7 @@ module instruction_trace_uart_reporter #(
             else if (mask[6]) first_field = FIELD_STORES;
             else if (mask[7]) first_field = FIELD_LDATA;
             else if (mask[8]) first_field = FIELD_RESULT;
+            else if (mask[9]) first_field = FIELD_OP;
             else first_field = FIELD_END;
         end
     endfunction
@@ -104,6 +106,7 @@ module instruction_trace_uart_reporter #(
                 FIELD_STORES:  field_length = 5'd16;
                 FIELD_LDATA:   field_length = 5'd15;
                 FIELD_RESULT:  field_length = 5'd12;
+                FIELD_OP:      field_length = 5'd11;
                 default:      field_length = 5'd2;  // CR/LF
             endcase
         end
@@ -121,6 +124,7 @@ module instruction_trace_uart_reporter #(
         input [31:0] value_store_count;
         input [31:0] value_load_data;
         input [1:0]  value_result_status;
+        input [31:0] value_instruction_for_op;
         begin
             field_char = 8'h20;
             if (field == FIELD_END) begin
@@ -245,6 +249,56 @@ module instruction_trace_uart_reporter #(
                             default: field_char = 8'h20;
                         endcase
                     end
+                    FIELD_OP: begin
+                        case (position)
+                            0: field_char = "O";
+                            1: field_char = "P";
+                            2: field_char = "=";
+                            3: field_char = (value_instruction_for_op[6:0] == 7'b0110111) ? "L" :
+                                                (value_instruction_for_op[6:0] == 7'b0010111) ? "A" :
+                                                (value_instruction_for_op[6:0] == 7'b1101111) ? "J" :
+                                                (value_instruction_for_op[6:0] == 7'b1100111) ? "J" :
+                                                (value_instruction_for_op[6:0] == 7'b1100011) ? "B" :
+                                                (value_instruction_for_op[6:0] == 7'b0000011) ? "L" :
+                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "S" :
+                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "O" :
+                                                (value_instruction_for_op[6:0] == 7'b0110011) ? "A" : "I";
+                            4: field_char = (value_instruction_for_op[6:0] == 7'b0110111) ? "U" :
+                                                (value_instruction_for_op[6:0] == 7'b0010111) ? "U" :
+                                                (value_instruction_for_op[6:0] == 7'b1101111) ? "A" :
+                                                (value_instruction_for_op[6:0] == 7'b1100111) ? "A" :
+                                                (value_instruction_for_op[6:0] == 7'b1100011) ? "R" :
+                                                (value_instruction_for_op[6:0] == 7'b0000011) ? "D" :
+                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "T" :
+                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "P" :
+                                                (value_instruction_for_op[6:0] == 7'b0110011) ? "L" : "L";
+                            5: field_char = (value_instruction_for_op[6:0] == 7'b0110111) ? "I" :
+                                                (value_instruction_for_op[6:0] == 7'b0010111) ? "I" :
+                                                (value_instruction_for_op[6:0] == 7'b1101111) ? "L" :
+                                                (value_instruction_for_op[6:0] == 7'b1100111) ? "R" :
+                                                (value_instruction_for_op[6:0] == 7'b1100011) ? "C" :
+                                                (value_instruction_for_op[6:0] == 7'b0000011) ? "D" :
+                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "O" :
+                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "I" :
+                                                (value_instruction_for_op[6:0] == 7'b0110011) ? "U" : "L";
+                            6: field_char = (value_instruction_for_op[6:0] == 7'b1101111) ? " " :
+                                                (value_instruction_for_op[6:0] == 7'b1100111) ? " " :
+                                                (value_instruction_for_op[6:0] == 7'b1100011) ? "H" :
+                                                (value_instruction_for_op[6:0] == 7'b0000011) ? " " :
+                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "R" :
+                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "M" :
+                                                (value_instruction_for_op[6:0] == 7'b0110011) ? " " : "L";
+                            7: field_char = (value_instruction_for_op[6:0] == 7'b1100011) ? " " :
+                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "E" :
+                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "M" :
+                                                (value_instruction_for_op[6:0] == 7'b0110011) ? " " : " ";
+                            8: field_char = (value_instruction_for_op[6:0] == 7'b0010011) ? " " :
+                                                (value_instruction_for_op[6:0] == 7'b0100011) ? " " : " ";
+                            9: field_char = (value_instruction_for_op[6:0] == 7'b0110011) ? " " : " ";
+                            5'd10: field_char = 8'h20;
+                            default: field_char = 8'h20;
+                        endcase
+                    end
                     default: field_char = 8'h20;
                 endcase
             end
@@ -263,7 +317,8 @@ module instruction_trace_uart_reporter #(
             report_instruction_count,
             report_store_count,
             report_load_data,
-            report_result_status
+            report_result_status,
+            report_instruction
         );
     end
 
@@ -273,7 +328,7 @@ module instruction_trace_uart_reporter #(
     always @(posedge clk) begin
         if (rst) begin
             active <= 1'b0;
-            remaining_fields <= 9'b0;
+            remaining_fields <= 10'b0;
             field_index <= FIELD_END;
             char_index <= 5'b0;
             report_pc <= 32'b0;
@@ -306,8 +361,8 @@ module instruction_trace_uart_reporter #(
                 else
                     char_index <= 5'd1;
             end else if (char_index + 5'd1 >= field_length(field_index)) begin
-                remaining_fields <= remaining_fields & ~(9'b0000_0000_1 << field_index);
-                field_index <= first_field(remaining_fields & ~(9'b0000_0000_1 << field_index));
+                remaining_fields <= remaining_fields & ~(10'b00_0000_0001 << field_index);
+                field_index <= first_field(remaining_fields & ~(10'b00_0000_0001 << field_index));
                 char_index <= 5'b0;
             end else begin
                 char_index <= char_index + 1'b1;

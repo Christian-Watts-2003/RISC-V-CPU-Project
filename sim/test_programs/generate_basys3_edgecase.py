@@ -95,7 +95,7 @@ check(5, 1)
 i(0, 2, 0b011, 6)        # SLTIU
 check(6, 0)
 i(0, 1, 0b011, 7)
-check(7, 1)
+check(7, 0)
 i(0x555, 1, 0b100, 8)    # XORI
 check(8, 0x7FFFFAAA)
 i(0x155, 0, 0b110, 9)    # ORI
@@ -118,8 +118,8 @@ r(0, 3, 3, 0b001, 16)    # SLL
 check(16, 2)
 r(0, 3, 11, 0b101, 17)   # SRL
 check(17, 0x40000000)
-r(0, 3, 2, 0b101, 18)    # SRA
-check(18, 0xFFFFFFFE)
+r(0b0100000, 3, 2, 0b101, 18)   # SRA
+check(18, 0xFFFFFFFF)
 r(0, 3, 2, 0b010, 19)    # SLT
 check(19, 1)
 r(0, 3, 2, 0b011, 20)    # SLTU

@@ -36,7 +36,7 @@ module basys3_trace_top #(
     wire        dmem_re;
     wire        dmem_we;
     wire        trace_busy;
-    wire [8:0]  trace_fields = sw[8:0];
+    wire [9:0]  trace_fields = {1'b1, sw[8:0]};
     reg [31:0]  cpu_divider_count;
     wire        divider_tick = (CPU_DIVIDER <= 1) ||
                                 (cpu_divider_count >= CPU_DIVIDER - 1);
