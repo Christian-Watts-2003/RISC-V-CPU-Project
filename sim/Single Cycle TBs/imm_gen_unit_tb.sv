@@ -15,6 +15,13 @@ module imm_gen_unit_tb;
     check(2,32'hfe208ee3,32'hffff_fffc,"B-type negative aligned offset");
     check(3,32'h800000b7,32'h8000_0000,"U-type upper immediate");
     check(4,32'hff1ff0ef,32'hffff_fffe,"J-type negative aligned offset");
+    check(0,32'h7ff00013,32'h0000_07ff,"I-type maximum positive");
+    check(0,32'h80000013,32'hffff_f800,"I-type minimum negative");
+    check(1,32'h7e000fa3,32'h0000_07ff,"S-type maximum positive");
+    check(1,32'h80000023,32'hffff_f800,"S-type minimum negative");
+    check(2,32'h00000063,32'h0000_0000,"B-type zero offset");
+    check(3,32'h00000037,32'h0000_0000,"U-type zero");
+    check(4,32'h0000006f,32'h0000_0000,"J-type zero offset");
     format=7;insn=0;#1;
     if(imm===0) begin pass_count++;$display("PASS | instruction=00000000 | invalid format default | expected=00000000 actual=%08h",imm);end
     else begin fail_count++;$display("FAIL | instruction=00000000 | invalid format default | expected=00000000 actual=%08h",imm);end

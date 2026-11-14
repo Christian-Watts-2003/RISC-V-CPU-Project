@@ -39,6 +39,11 @@ module muldiv_unit_tb;
     check(3'b101, 32'h12345678, 32'h00000000, 32'hffffffff, "DIVU by zero");
     check(3'b110, 32'h12345678, 32'h00000000, 32'h12345678, "REM by zero");
     check(3'b111, 32'h12345678, 32'h00000000, 32'h12345678, "REMU by zero");
+    check(3'b000, 32'hffffffff, 32'h00000002, 32'hfffffffe, "MUL negative result");
+    check(3'b100, 32'hffffffff, 32'h00000002, 32'hffffffff, "DIV negative result");
+    check(3'b101, 32'hffffffff, 32'h00000002, 32'h7fffffff, "DIVU unsigned boundary");
+    check(3'b110, 32'hffffffff, 32'h00000002, 32'hffffffff, "REM negative result");
+    check(3'b111, 32'hffffffff, 32'h00000002, 32'h00000001, "REMU unsigned boundary");
     start=0; #1;
     if (valid === 1'b0) begin pass_count=pass_count+1; $display("PASS | MULDIV idle valid | expected=0 actual=%b", valid); end
     else begin fail_count=fail_count+1; $display("FAIL | MULDIV idle valid | expected=0 actual=%b", valid); end

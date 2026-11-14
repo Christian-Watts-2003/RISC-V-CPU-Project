@@ -91,6 +91,7 @@ module single_cycle_tb;
         #1;
 
         check_reg(2,32'hffff_ff80);
+        check_reg(0,32'h0000_0000);
         check_reg(3,32'h0000_0080);
         check_reg(5,32'h0000_0123);
         check_reg(6,32'h0000_0123);

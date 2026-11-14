@@ -15,6 +15,10 @@ module lsu_unit_tb;
     check(0,32'h80ff_7f01,32'h0000_00ab,0,0,32'h0000_0001,32'h0000_00ab,1,"SB/lane0 and LB positive");
     check(1,32'h80ff_7f01,32'h0000_00ab,0,1,32'h0000_007f,32'h0000_ab00,2,"SB/lane1 and LBU");
     check(2,32'h80ff_7f01,32'h0000_1234,1,0,32'hffff_80ff,32'h1234_0000,12,"SH upper lane and LH sign");
+    check(3,32'hff00_0080,32'h0000_00cd,0,0,32'hffff_ff00,32'hcd00_0000,8,"SB/lane3 and LB sign");
+    check(3,32'hff00_0080,32'h0000_00cd,0,1,32'h0000_00ff,32'hcd00_0000,8,"SB/lane3 and LBU");
+    check(0,32'hffff_8000,32'h0000_8001,1,0,32'hffff_8000,32'h8001_0000,3,"SH/lane0 and LH sign");
+    check(0,32'h1234_5678,32'h1234_5678,3,0,32'h0000_0000,32'h1234_5678,0,"Invalid size");
     check(0,32'h80ff_7f01,32'h1234_5678,2,0,32'h80ff_7f01,32'h1234_5678,15,"SW/LW");
     $display("LSU SUMMARY | PASS=%0d FAIL=%0d",pass_count,fail_count);
     if(fail_count) begin

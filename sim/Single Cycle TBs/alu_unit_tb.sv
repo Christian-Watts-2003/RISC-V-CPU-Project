@@ -18,6 +18,15 @@ module alu_unit_tb;
     check(6,32'hffff_ffff,1,0,"SLTU unsigned"); check(7,1,4,16,"SLL");
     check(8,32'h8000_0000,1,32'h4000_0000,"SRL");
     check(9,32'h8000_0000,1,32'hc000_0000,"SRA");
+    check(0,32'hffff_ffff,1,0,"ADD wraparound");
+    check(1,0,1,32'hffff_ffff,"SUB underflow");
+    check(5,32'h8000_0000,0,1,"SLT minimum signed");
+    check(5,0,32'h8000_0000,0,"SLT signed boundary");
+    check(6,32'hffff_ffff,0,1,"SLTU maximum unsigned");
+    check(6,0,32'hffff_ffff,1,"SLTU unsigned boundary");
+    check(7,32'h8000_0000,31,0,"SLL shift amount 31");
+    check(8,32'h8000_0000,31,1,"SRL shift amount 31");
+    check(9,32'h8000_0000,31,32'hffff_ffff,"SRA shift amount 31");
     a=1;b=2;op=15;#1;
     if(illegal_op && result==0) begin pass_count++;$display("PASS | ALU op=f | illegal op | expected=illegal/0 actual=illegal/%h",result); end
     else begin fail_count++;$display("FAIL | ALU op=f | illegal op | expected=illegal/0 actual=%b/%h",illegal_op,result); end
