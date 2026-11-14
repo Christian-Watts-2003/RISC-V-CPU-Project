@@ -92,7 +92,7 @@ module controller (
             end
             7'b0110011: begin // OP and RV32M
                 if (funct7==7'b0000001) begin
-                    legal=1; reg_write=1; is_muldiv=1; muldiv_op=funct3;
+                    legal=0; reg_write=0; is_muldiv=0; muldiv_op=funct3;
                 end else begin
                     case (funct3)
                         3'b000: begin
