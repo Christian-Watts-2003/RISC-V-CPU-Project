@@ -328,8 +328,8 @@ module instruction_trace_uart_reporter #(
                                                 (value_result_status == 2'd2) ? "A" : "-";
                             9: field_char = (value_result_status == 2'd1) ? "S" :
                                                 (value_result_status == 2'd2) ? "I" : "-";
-                            10: field_char = (value_result_status == 2'd2) ? "L" :
-                                                 (value_result_status == 2'd0) ? "-" : " ";
+                            10: field_char = (value_result_status == 2'd1) ? "S" :
+                                                 (value_result_status == 2'd2) ? "L" : "-";
                             5'd11: field_char = 8'h20;
                             default: field_char = 8'h20;
                         endcase
