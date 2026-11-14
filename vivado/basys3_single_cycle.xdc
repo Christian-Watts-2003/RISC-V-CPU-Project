@@ -3,6 +3,11 @@
 set_property -dict {PACKAGE_PIN W5 IOSTANDARD LVCMOS33} [get_ports clk]
 create_clock -name sys_clk -period 10.000 [get_ports clk]
 
+# The board inputs are asynchronous to the CPU clock. Explicit zero-delay
+# assumptions remove unconstrained-I/O warnings without hiding internal paths.
+set_input_delay -clock sys_clk -min 0.000 [get_ports {btnC sw[*]}]
+set_input_delay -clock sys_clk -max 0.000 [get_ports {btnC sw[*]}]
+
 set_property -dict {PACKAGE_PIN U18 IOSTANDARD LVCMOS33} [get_ports btnC]
 
 set_property -dict {PACKAGE_PIN V17 IOSTANDARD LVCMOS33} [get_ports {sw[0]}]
@@ -53,6 +58,9 @@ set_property -dict {PACKAGE_PIN U2 IOSTANDARD LVCMOS33} [get_ports {an[0]}]
 set_property -dict {PACKAGE_PIN U4 IOSTANDARD LVCMOS33} [get_ports {an[1]}]
 set_property -dict {PACKAGE_PIN V4 IOSTANDARD LVCMOS33} [get_ports {an[2]}]
 set_property -dict {PACKAGE_PIN W4 IOSTANDARD LVCMOS33} [get_ports {an[3]}]
+
+set_output_delay -clock sys_clk -min 0.000 [get_ports {led[*] seg[*] an[*] dp uart_tx}]
+set_output_delay -clock sys_clk -max 0.000 [get_ports {led[*] seg[*] an[*] dp uart_tx}]
 
 set_property CONFIG_VOLTAGE 3.3 [current_design]
 set_property CFGBVS VCCO [current_design]
