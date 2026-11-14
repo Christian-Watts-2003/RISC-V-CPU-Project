@@ -11,13 +11,13 @@
 // This is an FPGA wrapper. Its ROM initialization uses $readmemh, which is
 // suitable for Vivado FPGA inference but is not part of the Innovus source.
 module basys3_single_cycle_top #(
-    parameter integer DEBUG_MODE = 1,
+    parameter integer DEBUG_MODE = 0,
     parameter integer DEBUG_DIV_BITS = 25,
     parameter integer IMEM_DEPTH = 1024,
     parameter integer DMEM_DEPTH = 1024,
-    parameter integer PERF_LIMIT = 0,
+    parameter integer PERF_LIMIT = 100000,
     parameter integer UART_BAUD_DIV = 868,
-    parameter IMEM_FILE = ""
+    parameter IMEM_FILE = "C:/Users/watts/RISC-V-CPU-Project/sim/test_programs/basys3_rv32im_edgecase.hex"
 ) (
     input  wire        clk,
     input  wire        btnC,
