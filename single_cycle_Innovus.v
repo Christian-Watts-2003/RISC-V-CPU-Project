@@ -290,10 +290,8 @@ module regfile (
     output wire [31:0] read_data2
 );
     reg [31:0] registers [0:31];
-    assign read_data1=(rs1==0) ? 32'b0 :
-        ((reg_write && rd!=0 && rs1==rd) ? write_data : registers[rs1]);
-    assign read_data2=(rs2==0) ? 32'b0 :
-        ((reg_write && rd!=0 && rs2==rd) ? write_data : registers[rs2]);
+    assign read_data1=(rs1==0) ? 32'b0 : registers[rs1];
+    assign read_data2=(rs2==0) ? 32'b0 : registers[rs2];
     always @(posedge clk)
         if (reg_write && rd!=0) registers[rd] <= write_data;
 endmodule
