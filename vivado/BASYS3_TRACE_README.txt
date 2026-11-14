@@ -15,6 +15,11 @@ Sources
 Switch controls
 ---------------
 sw[15] is the run/enable switch. When it is off, the CPU is paused.
+
+The UART baud rate and CPU stepping rate are independent. Keep
+UART_BAUD_DIV at 868 for 115200 baud with the 100 MHz Basys3 clock. To slow
+instruction execution, set CPU_DIVIDER in basys3_trace_top; for example,
+CPU_DIVIDER=10000000 permits one instruction step approximately every 0.1 s.
 When it is on, one instruction executes only after the previous UART trace
 line has completed.
 

@@ -10,6 +10,7 @@ module basys3_trace_top #(
     parameter integer IMEM_DEPTH = 1024,
     parameter integer DMEM_DEPTH = 256,
     parameter integer UART_BAUD_DIV = 868,
+    parameter integer CPU_DIVIDER = 10000000,
     parameter IMEM_FILE = "C:/Users/watts/RISC-V-CPU-Project/sim/test_programs/basys3_rv32im_edgecase.hex"
 ) (
     input  wire        clk,
@@ -36,7 +37,11 @@ module basys3_trace_top #(
     wire        dmem_we;
     wire        trace_busy;
     wire [7:0]  trace_fields = sw[7:0];
-    wire        cpu_enable = sw[15] && (|trace_fields) && !trace_busy;
+    reg [31:0]  cpu_divider_count;
+    wire        divider_tick = (CPU_DIVIDER <= 1) ||
+                                (cpu_divider_count >= CPU_DIVIDER - 1);
+    wire        cpu_enable = sw[15] && (|trace_fields) && !trace_busy &&
+                             divider_tick;
 
     initial begin
         for (i = 0; i < IMEM_DEPTH; i = i + 1)
@@ -91,14 +96,25 @@ module basys3_trace_top #(
 
     always @(posedge clk) begin
         if (btnC) begin
+            cpu_divider_count <= 32'b0;
             cycle_count <= 32'b0;
             instruction_count <= 32'b0;
             store_count <= 32'b0;
-        end else if (cpu_enable) begin
-            cycle_count <= cycle_count + 32'd1;
-            instruction_count <= instruction_count + 32'd1;
-            if (dmem_we)
-                store_count <= store_count + 32'd1;
+        end else begin
+            if (!sw[15] || trace_busy || !(|trace_fields)) begin
+                cpu_divider_count <= 32'b0;
+            end else if (divider_tick) begin
+                cpu_divider_count <= 32'b0;
+            end else begin
+                cpu_divider_count <= cpu_divider_count + 32'd1;
+            end
+
+            if (cpu_enable) begin
+                cycle_count <= cycle_count + 32'd1;
+                instruction_count <= instruction_count + 32'd1;
+                if (dmem_we)
+                    store_count <= store_count + 32'd1;
+            end
         end
     end
 
