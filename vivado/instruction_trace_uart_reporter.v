@@ -91,14 +91,14 @@ module instruction_trace_uart_reporter #(
         input [3:0] field;
         begin
             case (field)
-                FIELD_PC:     field_length = 5'd11; // PC= + 8 hex digits
-                FIELD_INSTR:  field_length = 5'd14;
-                FIELD_DADDR:  field_length = 5'd14;
-                FIELD_SWDATA: field_length = 5'd15;
-                FIELD_CYCLES: field_length = 5'd15;
-                FIELD_ICOUNT: field_length = 5'd14;
-                FIELD_STORES: field_length = 5'd15;
-                FIELD_LDATA:  field_length = 5'd14;
+                FIELD_PC:     field_length = 5'd12; // PC= + 8 hex digits + space
+                FIELD_INSTR:  field_length = 5'd15;
+                FIELD_DADDR:  field_length = 5'd15;
+                FIELD_SWDATA: field_length = 5'd16;
+                FIELD_CYCLES:  field_length = 5'd16;
+                FIELD_ICOUNT:  field_length = 5'd15;
+                FIELD_STORES:  field_length = 5'd16;
+                FIELD_LDATA:   field_length = 5'd15;
                 default:      field_length = 5'd2;  // CR/LF
             endcase
         end
@@ -126,6 +126,7 @@ module instruction_trace_uart_reporter #(
                             0: field_char = "P";
                             1: field_char = "C";
                             2: field_char = "=";
+                            5'd11: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_pc, position - 3));
                         endcase
                     end
@@ -137,6 +138,7 @@ module instruction_trace_uart_reporter #(
                             3: field_char = "T";
                             4: field_char = "R";
                             5: field_char = "=";
+                            5'd14: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_instruction, position - 6));
                         endcase
                     end
@@ -148,6 +150,7 @@ module instruction_trace_uart_reporter #(
                             3: field_char = "D";
                             4: field_char = "R";
                             5: field_char = "=";
+                            5'd14: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_data_addr, position - 6));
                         endcase
                     end
@@ -160,6 +163,7 @@ module instruction_trace_uart_reporter #(
                             4: field_char = "T";
                             5: field_char = "A";
                             6: field_char = "=";
+                            5'd15: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_store_data, position - 7));
                         endcase
                     end
@@ -172,6 +176,7 @@ module instruction_trace_uart_reporter #(
                             4: field_char = "E";
                             5: field_char = "S";
                             6: field_char = "=";
+                            5'd15: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_cycles, position - 7));
                         endcase
                     end
@@ -184,6 +189,7 @@ module instruction_trace_uart_reporter #(
                             4: field_char = "N";
                             5: field_char = "T";
                             6: field_char = "=";
+                            5'd14: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_instruction_count, position - 7));
                         endcase
                     end
@@ -196,6 +202,7 @@ module instruction_trace_uart_reporter #(
                             4: field_char = "E";
                             5: field_char = "S";
                             6: field_char = "=";
+                            5'd15: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_store_count, position - 7));
                         endcase
                     end
@@ -207,6 +214,7 @@ module instruction_trace_uart_reporter #(
                             3: field_char = "T";
                             4: field_char = "A";
                             5: field_char = "=";
+                            5'd14: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_load_data, position - 6));
                         endcase
                     end
