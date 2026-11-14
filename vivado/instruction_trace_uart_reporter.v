@@ -112,6 +112,91 @@ module instruction_trace_uart_reporter #(
         end
     endfunction
 
+    function [7:0] op_label_char;
+        input [6:0] opcode;
+        input [3:0] position;
+        begin
+            op_label_char = 8'h20;
+            case (opcode)
+                7'b0110111: case (position)
+                    0: op_label_char = "L";
+                    1: op_label_char = "U";
+                    2: op_label_char = "I";
+                    default: ;
+                endcase
+                7'b0010111: case (position)
+                    0: op_label_char = "A";
+                    1: op_label_char = "U";
+                    2: op_label_char = "I";
+                    3: op_label_char = "P";
+                    4: op_label_char = "C";
+                    default: ;
+                endcase
+                7'b1101111: case (position)
+                    0: op_label_char = "J";
+                    1: op_label_char = "A";
+                    2: op_label_char = "L";
+                    default: ;
+                endcase
+                7'b1100111: case (position)
+                    0: op_label_char = "J";
+                    1: op_label_char = "A";
+                    2: op_label_char = "L";
+                    3: op_label_char = "R";
+                    default: ;
+                endcase
+                7'b1100011: case (position)
+                    0: op_label_char = "B";
+                    1: op_label_char = "R";
+                    2: op_label_char = "A";
+                    3: op_label_char = "N";
+                    4: op_label_char = "C";
+                    5: op_label_char = "H";
+                    default: ;
+                endcase
+                7'b0000011: case (position)
+                    0: op_label_char = "L";
+                    1: op_label_char = "O";
+                    2: op_label_char = "A";
+                    3: op_label_char = "D";
+                    default: ;
+                endcase
+                7'b0100011: case (position)
+                    0: op_label_char = "S";
+                    1: op_label_char = "T";
+                    2: op_label_char = "O";
+                    3: op_label_char = "R";
+                    4: op_label_char = "E";
+                    default: ;
+                endcase
+                7'b0010011: case (position)
+                    0: op_label_char = "O";
+                    1: op_label_char = "P";
+                    2: op_label_char = "I";
+                    3: op_label_char = "M";
+                    4: op_label_char = "M";
+                    default: ;
+                endcase
+                7'b0110011: case (position)
+                    0: op_label_char = "A";
+                    1: op_label_char = "L";
+                    2: op_label_char = "U";
+                    default: ;
+                endcase
+                default: case (position)
+                    0: op_label_char = "I";
+                    1: op_label_char = "L";
+                    2: op_label_char = "L";
+                    3: op_label_char = "E";
+                    4: op_label_char = "G";
+                    5: op_label_char = "A";
+                    6: op_label_char = "L";
+                    default: ;
+                endcase
+            endcase
+        end
+    endfunction
+
     function [7:0] field_char;
         input [3:0]  field;
         input [4:0]  position;
@@ -254,49 +339,9 @@ module instruction_trace_uart_reporter #(
                             0: field_char = "O";
                             1: field_char = "P";
                             2: field_char = "=";
-                            3: field_char = (value_instruction_for_op[6:0] == 7'b0110111) ? "L" :
-                                                (value_instruction_for_op[6:0] == 7'b0010111) ? "A" :
-                                                (value_instruction_for_op[6:0] == 7'b1101111) ? "J" :
-                                                (value_instruction_for_op[6:0] == 7'b1100111) ? "J" :
-                                                (value_instruction_for_op[6:0] == 7'b1100011) ? "B" :
-                                                (value_instruction_for_op[6:0] == 7'b0000011) ? "L" :
-                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "S" :
-                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "O" :
-                                                (value_instruction_for_op[6:0] == 7'b0110011) ? "A" : "I";
-                            4: field_char = (value_instruction_for_op[6:0] == 7'b0110111) ? "U" :
-                                                (value_instruction_for_op[6:0] == 7'b0010111) ? "U" :
-                                                (value_instruction_for_op[6:0] == 7'b1101111) ? "A" :
-                                                (value_instruction_for_op[6:0] == 7'b1100111) ? "A" :
-                                                (value_instruction_for_op[6:0] == 7'b1100011) ? "R" :
-                                                (value_instruction_for_op[6:0] == 7'b0000011) ? "D" :
-                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "T" :
-                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "P" :
-                                                (value_instruction_for_op[6:0] == 7'b0110011) ? "L" : "L";
-                            5: field_char = (value_instruction_for_op[6:0] == 7'b0110111) ? "I" :
-                                                (value_instruction_for_op[6:0] == 7'b0010111) ? "I" :
-                                                (value_instruction_for_op[6:0] == 7'b1101111) ? "L" :
-                                                (value_instruction_for_op[6:0] == 7'b1100111) ? "R" :
-                                                (value_instruction_for_op[6:0] == 7'b1100011) ? "C" :
-                                                (value_instruction_for_op[6:0] == 7'b0000011) ? "D" :
-                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "O" :
-                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "I" :
-                                                (value_instruction_for_op[6:0] == 7'b0110011) ? "U" : "L";
-                            6: field_char = (value_instruction_for_op[6:0] == 7'b1101111) ? " " :
-                                                (value_instruction_for_op[6:0] == 7'b1100111) ? " " :
-                                                (value_instruction_for_op[6:0] == 7'b1100011) ? "H" :
-                                                (value_instruction_for_op[6:0] == 7'b0000011) ? " " :
-                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "R" :
-                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "M" :
-                                                (value_instruction_for_op[6:0] == 7'b0110011) ? " " : "L";
-                            7: field_char = (value_instruction_for_op[6:0] == 7'b1100011) ? " " :
-                                                (value_instruction_for_op[6:0] == 7'b0100011) ? "E" :
-                                                (value_instruction_for_op[6:0] == 7'b0010011) ? "M" :
-                                                (value_instruction_for_op[6:0] == 7'b0110011) ? " " : " ";
-                            8: field_char = (value_instruction_for_op[6:0] == 7'b0010011) ? " " :
-                                                (value_instruction_for_op[6:0] == 7'b0100011) ? " " : " ";
-                            9: field_char = (value_instruction_for_op[6:0] == 7'b0110011) ? " " : " ";
-                            5'd10: field_char = 8'h20;
-                            default: field_char = 8'h20;
+                            default: field_char = op_label_char(
+                                value_instruction_for_op[6:0], position - 3
+                            );
                         endcase
                     end
                     default: field_char = 8'h20;
