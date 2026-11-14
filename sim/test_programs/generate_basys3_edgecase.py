@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a self-checking RV32IM image for the Basys3 wrapper."""
+"""Generate a self-checking RV32I image for the Basys3 wrapper."""
 
 from pathlib import Path
 
@@ -187,37 +187,6 @@ s(8, 8, 0, 0b010)       # SW
 i(8, 0, 0b010, 9, 0b0000011)   # LW
 bne(9, 8, "fail")
 
-# All eight RV32M operations and divide-by-zero/overflow rules.
-li(1, 0x7FFFFFFF)
-li(2, -1)
-li(3, 2)
-li(4, 0xFFFFFFFF)
-r(1, 2, 1, 0b000, 5)    # MUL
-check(5, 0x80000001)
-r(1, 2, 1, 0b001, 6)    # MULH
-check(6, 0xFFFFFFFF)
-r(1, 4, 2, 0b010, 7)    # MULHSU
-check(7, 0xFFFFFFFF)
-r(1, 4, 4, 0b011, 8)    # MULHU
-check(8, 0xFFFFFFFE)
-li(9, 0x80000000)
-r(1, 2, 9, 0b100, 10)   # DIV overflow
-check(10, 0x80000000)
-r(1, 3, 4, 0b101, 11)   # DIVU
-check(11, 0x7FFFFFFF)
-r(1, 2, 9, 0b110, 12)   # REM overflow
-check(12, 0)
-r(1, 3, 4, 0b111, 13)   # REMU
-check(13, 1)
-r(1, 0, 1, 0b100, 14)    # DIV by zero
-check(14, 0xFFFFFFFF)
-r(1, 0, 1, 0b101, 15)    # DIVU by zero
-check(15, 0xFFFFFFFF)
-r(1, 0, 1, 0b110, 16)    # REM by zero
-check(16, 0x7FFFFFFF)
-r(1, 0, 1, 0b111, 17)    # REMU by zero
-check(17, 0x7FFFFFFF)
-
 label("pass")
 li(30, 0x600D600D)
 s(0, 30, 0, 0b010)       # dmem[0] = PASS marker
@@ -268,7 +237,7 @@ def encode(kind, args, pc):
     raise ValueError(kind)
 
 
-output = Path(__file__).with_name("basys3_rv32im_edgecase.hex")
+output = Path(__file__).with_name("basys3_rv32i_edgecase.hex")
 with output.open("w", encoding="ascii") as file:
     for index, (kind, args) in enumerate(words):
         file.write(f"{encode(kind, args, index * 4):08x}\n")

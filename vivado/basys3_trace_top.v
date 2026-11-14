@@ -11,7 +11,7 @@ module basys3_trace_top #(
     parameter integer DMEM_DEPTH = 256,
     parameter integer UART_BAUD_DIV = 868,
     parameter integer CPU_DIVIDER = 10000000,
-    parameter IMEM_FILE = "C:/Users/watts/RISC-V-CPU-Project/sim/test_programs/basys3_rv32im_edgecase.hex"
+    parameter IMEM_FILE = "C:/Users/watts/RISC-V-CPU-Project/sim/test_programs/basys3_rv32i_edgecase.hex"
 ) (
     input  wire        clk,
     input  wire        btnC,
