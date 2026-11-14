@@ -54,3 +54,10 @@ finishes, the wrapper transmits one line through uart_tx at 115200 baud,
 Connect the Basys3 USB cable, identify its virtual COM port, and configure
 Tera Term for 115200-8-N-1 with no flow control. The UART output is on the
 Basys3 USB-RS232 transmit pin.
+
+Included board test image
+-------------------------
+`sim/test_programs/basys3_rv32im_edgecase.hex` is a self-checking RV32IM
+image covering the maintained instruction subset and documented edge cases.
+It writes `600D0001` to data memory address 0 on success or `DEAD0001` on
+failure. Set `sw[3:0]` to 7 after the run to display that marker.
