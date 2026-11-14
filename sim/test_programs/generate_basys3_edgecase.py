@@ -6,6 +6,7 @@ from pathlib import Path
 
 words = []
 labels = {}
+next_test_id = 1
 
 
 def label(name):
@@ -71,8 +72,12 @@ def beq(rs1, rs2, target):
 
 
 def check(reg, expected):
+    global next_test_id
     li(24, expected)
+    li(25, next_test_id)
     bne(reg, 24, "fail")
+    s(0x100, 25, 0, 0b010)  # pass event: reserved test-report address
+    next_test_id += 1
 
 
 # RV32I upper/immediate and PC-relative operations.
@@ -195,6 +200,7 @@ i(0, 0, 0b010, 31, 0b0000011)
 j("pass_loop", 0)
 
 label("fail")
+s(0x104, 25, 0, 0b010)       # fail event: reserved test-report address
 li(30, 0xDEADFA11)
 s(0, 30, 0, 0b010)       # dmem[0] = FAIL marker
 label("fail_loop")

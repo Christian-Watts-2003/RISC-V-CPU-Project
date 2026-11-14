@@ -49,6 +49,11 @@ The trace automatically appends an opcode-class label (`OP=LUI`, `OP=AUIPC`,
 `OP=JAL`, `OP=JALR`, `OP=BRANCH`, `OP=LOAD`, `OP=STORE`, `OP=OPIMM`,
 `OP=ALU`, or `OP=ILLEGAL`) to each line.
 
+The RV32I image also assigns each check a test number. Passing checks emit
+`TEST=PASS 00000001`-style events, and a failing check emits `TEST=FAIL`
+with its test number before the overall `RESULT=FAIL` marker. Test events use
+reserved data addresses `0x100` and `0x104` and are handled by the wrapper.
+
 The instruction ROM is initialized from IMEM_FILE. The default path is the
 existing Basys3 test image; set the parameter or manage the HEX file in the
 Vivado project if the path differs on the host machine.

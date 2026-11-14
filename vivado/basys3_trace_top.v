@@ -36,7 +36,7 @@ module basys3_trace_top #(
     wire        dmem_re;
     wire        dmem_we;
     wire        trace_busy;
-    wire [9:0]  trace_fields = {1'b1, sw[8:0]};
+    wire [10:0] trace_fields = {1'b1, 1'b1, sw[8:0]};
     reg [31:0]  cpu_divider_count;
     wire        divider_tick = (CPU_DIVIDER <= 1) ||
                                 (cpu_divider_count >= CPU_DIVIDER - 1);
@@ -45,6 +45,10 @@ module basys3_trace_top #(
     wire [1:0]  result_status =
         (dmem_we && dmem_addr == 32'b0 && dmem_wdata == 32'h600D600D) ? 2'd1 :
         (dmem_we && dmem_addr == 32'b0 && dmem_wdata == 32'hDEADFA11) ? 2'd2 :
+        2'd0;
+    wire [1:0]  test_status =
+        (dmem_we && dmem_addr == 32'h00000100) ? 2'd1 :
+        (dmem_we && dmem_addr == 32'h00000104) ? 2'd2 :
         2'd0;
 
     initial begin
@@ -85,6 +89,8 @@ module basys3_trace_top #(
         .start(cpu_enable),
         .field_enable(trace_fields),
         .result_status(result_status),
+        .test_status(test_status),
+        .test_id(dmem_wdata),
         .pc(imem_addr),
         .instruction(imem_rdata),
         .data_addr(dmem_addr),
