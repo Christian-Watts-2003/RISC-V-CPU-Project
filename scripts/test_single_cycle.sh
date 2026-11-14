@@ -18,5 +18,5 @@ iverilog -g2012 -Wall -s single_cycle_tb -o "$OUT" \
   "$ROOT"/rtl/single_cycle/muldiv.sv \
   "$ROOT"/rtl/single_cycle/regfile.sv \
   "$ROOT"/rtl/single_cycle/top.sv \
-  "$ROOT"/sim/single_cycle_tb.sv
+  "$ROOT/sim/Single Cycle TBs/single_cycle_tb.sv"
 vvp "$OUT"

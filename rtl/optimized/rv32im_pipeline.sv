@@ -1,5 +1,5 @@
 // Five-stage RV32IM pipeline and controlled optimization variants.
-// Compile this file together with the repository's rtl/regfile.sv.
+// Compile this file together with rtl/pipeline/regfile.v.
 // Instruction memory is combinational: instruction must correspond to pc.
 // Data memory read_data is the aligned 32-bit word at mem_addr[31:2].
 

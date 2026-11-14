@@ -24,31 +24,13 @@ A RISC-V RV32I processor implementation on FPGA, designed as a master's thesis p
 
 ## Repository Structure
 
-RISC-V-CPU/\
-├── .gitignore\
-├── README.md\
-├── LICENSE\
-├── rtl/\
-│   ├── alu.sv\
-│   ├── regfile.sv\
-│   ├── imm_gen.sv\
-│   ├── controller.sv\
-│   ├── datapath.sv\
-│   └── cpu.sv\
-├── sim/\
-│   ├── alu_tb.sv\
-│   ├── regfile_tb.sv\
-│   ├── cpu_tb.sv\
-│   └── test_programs/\
-│       └── program1.hex\
-├── vivado/\
-│   └── basys3.xdc\
-├── docs/\
-│   ├── design.md\
-│   ├── isa_reference.md\
-│   └── architecture.md\
-└── scripts/\
-    └── run_sim.sh\
+- `rtl/single_cycle/` - maintained single-cycle implementation.
+- `rtl/pipeline/` - five-stage pipeline implementation scaffold.
+- `rtl/optimized/` - experimental optimization variants.
+- `sim/Single Cycle TBs/` - maintained single-cycle testbenches.
+- `legacy files/` - superseded RTL and testbenches retained for reference.
+- `docs/` - project specifications and design documentation.
+- `scripts/` - repeatable simulation helpers.
 
 ## Building & Simulation
 
@@ -61,15 +43,13 @@ RISC-V-CPU/\
 ### Running Simulations
 
 ```bash
-# In Vivado:
-# 1. Create new project
-# 2. Add RTL sources from rtl/
-# 3. Add testbench from sim/
+# In Vivado, add only rtl/single_cycle/*.sv as design sources and
+# sim/Single Cycle TBs/single_cycle_tb.sv as the simulation source.
 # 4. Run simulation
 
 # Or via command line:
-vlog rtl/alu.sv sim/alu_tb.sv
-vsim alu_tb
+vlog rtl/single_cycle/*.sv "sim/Single Cycle TBs/single_cycle_tb.sv"
+vsim single_cycle_tb
 run -all
 ```
 

@@ -22,7 +22,12 @@ module alu_unit_tb;
     if(illegal_op && result==0) begin pass_count++;$display("PASS | ALU op=f | illegal op | expected=illegal/0 actual=illegal/%h",result); end
     else begin fail_count++;$display("FAIL | ALU op=f | illegal op | expected=illegal/0 actual=%b/%h",illegal_op,result); end
     $display("ALU SUMMARY | PASS=%0d FAIL=%0d",pass_count,fail_count);
-    if(fail_count) $display("ALU FAILED CASES: see FAIL lines above."); else $display("ALU ALL TESTS PASSED");
+    if(fail_count) begin
+      $display("ALU FAILED CASES: see FAIL lines above.");
+      $fatal(1, "ALU unit test failed");
+    end else begin
+      $display("ALU ALL TESTS PASSED");
+    end
     $finish;
   end
 endmodule

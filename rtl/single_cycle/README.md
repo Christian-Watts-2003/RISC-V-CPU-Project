@@ -1,6 +1,6 @@
 # Single-cycle RV32IM backup
 
-This folder is the maintained, isolated single-cycle implementation. It is intentionally separate from `rtl/pipeline/` and from the preserved originals in `rtl/` and `rtl/single_cycle_reference/`. Compile only files in this directory together; these modules reuse common names such as `alu`, `regfile`, and `imm_gen`.
+This folder is the maintained, isolated single-cycle implementation. It is intentionally separate from `rtl/pipeline/` and from the preserved files in `legacy files/`. Compile only files in this directory together; these modules reuse common names such as `alu`, `regfile`, and `imm_gen`.
 
 ## Supported behavior
 

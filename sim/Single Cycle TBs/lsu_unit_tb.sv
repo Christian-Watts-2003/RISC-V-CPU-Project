@@ -14,8 +14,15 @@ module lsu_unit_tb;
   initial begin
     check(0,32'h80ff_7f01,32'h0000_00ab,0,0,32'h0000_0001,32'h0000_00ab,1,"SB/lane0 and LB positive");
     check(1,32'h80ff_7f01,32'h0000_00ab,0,1,32'h0000_007f,32'h0000_ab00,2,"SB/lane1 and LBU");
-    check(2,32'h80ff_7f01,32'h0000_1234,1,0,32'hffff_ff7f,32'h0000_1234,12,"SH upper lane and LH sign");
+    check(2,32'h80ff_7f01,32'h0000_1234,1,0,32'hffff_80ff,32'h1234_0000,12,"SH upper lane and LH sign");
     check(0,32'h80ff_7f01,32'h1234_5678,2,0,32'h80ff_7f01,32'h1234_5678,15,"SW/LW");
-    $display("LSU SUMMARY | PASS=%0d FAIL=%0d",pass_count,fail_count);if(fail_count)$display("LSU FAILED CASES: see FAIL lines above.");else $display("LSU ALL TESTS PASSED");$finish;
+    $display("LSU SUMMARY | PASS=%0d FAIL=%0d",pass_count,fail_count);
+    if(fail_count) begin
+      $display("LSU FAILED CASES: see FAIL lines above.");
+      $fatal(1, "LSU unit test failed");
+    end else begin
+      $display("LSU ALL TESTS PASSED");
+    end
+    $finish;
   end
 endmodule

@@ -4,7 +4,7 @@ This directory contains a separate pipelined experiment; the original single-cyc
 
 ## Variants
 
-Compile `rtl/optimized/rv32im_pipeline.sv` with `rtl/regfile.sv`. It defines four top modules with the same external interface:
+Compile `rtl/optimized/rv32im_pipeline.sv` with `rtl/pipeline/regfile.v`. It defines four top modules with the same external interface:
 
 | Top module | Fetch pre-decode | OR-gated ALU/M-extension result selection |
 |---|---:|---:|
