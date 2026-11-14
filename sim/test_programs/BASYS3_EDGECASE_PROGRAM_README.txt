@@ -13,8 +13,8 @@ division overflow, x0 behavior, and an unsupported encoding.
 The program is self-checking. It branches to a failure loop on the first
 incorrect result. It writes one of these markers to data memory address 0:
 
-  0x600D0001  PASS
-  0xDEAD0001  FAIL
+  0x600D600D  PASS
+  0xDEADFA11  FAIL
 
 For the Basys3 wrapper, set:
 

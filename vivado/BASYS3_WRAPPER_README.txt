@@ -59,5 +59,5 @@ Included board test image
 -------------------------
 `sim/test_programs/basys3_rv32im_edgecase.hex` is a self-checking RV32IM
 image covering the maintained instruction subset and documented edge cases.
-It writes `600D0001` to data memory address 0 on success or `DEAD0001` on
-failure. Set `sw[3:0]` to 7 after the run to display that marker.
+It writes `600D600D` to data memory address 0 on success or `DEADFA11` on
+failure. Set `sw[3:0]` to 7 after the run to display the low 16-bit marker.

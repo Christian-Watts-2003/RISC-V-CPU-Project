@@ -219,14 +219,14 @@ r(1, 0, 1, 0b111, 17)    # REMU by zero
 check(17, 0x7FFFFFFF)
 
 label("pass")
-li(30, 0x600D0001)
+li(30, 0x600D600D)
 s(0, 30, 0, 0b010)       # dmem[0] = PASS marker
 label("pass_loop")
 i(0, 0, 0b010, 31, 0b0000011)
 j("pass_loop", 0)
 
 label("fail")
-li(30, 0xDEAD0001)
+li(30, 0xDEADFA11)
 s(0, 30, 0, 0b010)       # dmem[0] = FAIL marker
 label("fail_loop")
 i(0, 0, 0b010, 31, 0b0000011)
