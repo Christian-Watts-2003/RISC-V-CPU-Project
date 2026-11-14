@@ -7,7 +7,8 @@ module instruction_trace_uart_reporter #(
     input  wire        clk,
     input  wire        rst,
     input  wire        start,
-    input  wire [7:0]  field_enable,
+    input  wire [8:0] field_enable,
+    input  wire [1:0] result_status,
     input  wire [31:0] pc,
     input  wire [31:0] instruction,
     input  wire [31:0] data_addr,
@@ -27,10 +28,11 @@ module instruction_trace_uart_reporter #(
     localparam [3:0] FIELD_ICOUNT = 4'd5;
     localparam [3:0] FIELD_STORES = 4'd6;
     localparam [3:0] FIELD_LDATA  = 4'd7;
-    localparam [3:0] FIELD_END    = 4'd8;
+    localparam [3:0] FIELD_RESULT = 4'd8;
+    localparam [3:0] FIELD_END    = 4'd9;
 
     reg        active;
-    reg [7:0]  remaining_fields;
+    reg [8:0]  remaining_fields;
     reg [3:0]  field_index;
     reg [4:0]  char_index;
     reg [31:0] report_pc;
@@ -41,12 +43,13 @@ module instruction_trace_uart_reporter #(
     reg [31:0] report_instruction_count;
     reg [31:0] report_store_count;
     reg [31:0] report_load_data;
+    reg [1:0]  report_result_status;
     reg [7:0]  tx_data;
     wire       tx_busy;
     wire       tx_start;
 
     function [3:0] first_field;
-        input [7:0] mask;
+        input [8:0] mask;
         begin
             if (mask[0]) first_field = FIELD_PC;
             else if (mask[1]) first_field = FIELD_INSTR;
@@ -56,6 +59,7 @@ module instruction_trace_uart_reporter #(
             else if (mask[5]) first_field = FIELD_ICOUNT;
             else if (mask[6]) first_field = FIELD_STORES;
             else if (mask[7]) first_field = FIELD_LDATA;
+            else if (mask[8]) first_field = FIELD_RESULT;
             else first_field = FIELD_END;
         end
     endfunction
@@ -99,6 +103,7 @@ module instruction_trace_uart_reporter #(
                 FIELD_ICOUNT:  field_length = 5'd15;
                 FIELD_STORES:  field_length = 5'd16;
                 FIELD_LDATA:   field_length = 5'd15;
+                FIELD_RESULT:  field_length = 5'd12;
                 default:      field_length = 5'd2;  // CR/LF
             endcase
         end
@@ -115,6 +120,7 @@ module instruction_trace_uart_reporter #(
         input [31:0] value_instruction_count;
         input [31:0] value_store_count;
         input [31:0] value_load_data;
+        input [1:0]  value_result_status;
         begin
             field_char = 8'h20;
             if (field == FIELD_END) begin
@@ -218,6 +224,27 @@ module instruction_trace_uart_reporter #(
                             default: field_char = hex_ascii(hex_nibble(value_load_data, position - 6));
                         endcase
                     end
+                    FIELD_RESULT: begin
+                        case (position)
+                            0: field_char = "R";
+                            1: field_char = "E";
+                            2: field_char = "S";
+                            3: field_char = "U";
+                            4: field_char = "L";
+                            5: field_char = "T";
+                            6: field_char = "=";
+                            7: field_char = (value_result_status == 2'd1) ? "P" :
+                                                (value_result_status == 2'd2) ? "F" : "-";
+                            8: field_char = (value_result_status == 2'd1) ? "A" :
+                                                (value_result_status == 2'd2) ? "A" : "-";
+                            9: field_char = (value_result_status == 2'd1) ? "S" :
+                                                (value_result_status == 2'd2) ? "I" : "-";
+                            10: field_char = (value_result_status == 2'd2) ? "L" :
+                                                 (value_result_status == 2'd0) ? "-" : " ";
+                            5'd11: field_char = 8'h20;
+                            default: field_char = 8'h20;
+                        endcase
+                    end
                     default: field_char = 8'h20;
                 endcase
             end
@@ -235,7 +262,8 @@ module instruction_trace_uart_reporter #(
             report_cycles,
             report_instruction_count,
             report_store_count,
-            report_load_data
+            report_load_data,
+            report_result_status
         );
     end
 
@@ -245,7 +273,7 @@ module instruction_trace_uart_reporter #(
     always @(posedge clk) begin
         if (rst) begin
             active <= 1'b0;
-            remaining_fields <= 8'b0;
+            remaining_fields <= 9'b0;
             field_index <= FIELD_END;
             char_index <= 5'b0;
             report_pc <= 32'b0;
@@ -256,6 +284,7 @@ module instruction_trace_uart_reporter #(
             report_instruction_count <= 32'b0;
             report_store_count <= 32'b0;
             report_load_data <= 32'b0;
+            report_result_status <= 2'b0;
         end else if (!active && start) begin
             active <= 1'b1;
             remaining_fields <= field_enable;
@@ -269,6 +298,7 @@ module instruction_trace_uart_reporter #(
             report_instruction_count <= instruction_count;
             report_store_count <= store_count;
             report_load_data <= load_data;
+            report_result_status <= result_status;
         end else if (tx_start) begin
             if (field_index == FIELD_END) begin
                 if (char_index == 5'd1)
@@ -276,8 +306,8 @@ module instruction_trace_uart_reporter #(
                 else
                     char_index <= 5'd1;
             end else if (char_index + 5'd1 >= field_length(field_index)) begin
-                remaining_fields <= remaining_fields & ~(8'b0000_0001 << field_index);
-                field_index <= first_field(remaining_fields & ~(8'b0000_0001 << field_index));
+                remaining_fields <= remaining_fields & ~(9'b0000_0000_1 << field_index);
+                field_index <= first_field(remaining_fields & ~(9'b0000_0000_1 << field_index));
                 char_index <= 5'b0;
             end else begin
                 char_index <= char_index + 1'b1;

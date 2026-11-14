@@ -1,9 +1,9 @@
 // Basys3 instruction-trace wrapper.
 //
-// sw[15] enables execution. sw[7:0] select UART fields:
+// sw[15] enables execution. sw[8:0] select UART fields:
 //   sw[0] PC, sw[1] instruction, sw[2] data address, sw[3] store data,
 //   sw[4] cycle count, sw[5] instruction count, sw[6] store count,
-//   sw[7] load data.
+//   sw[7] load data, sw[8] expected test result.
 // The CPU advances once per selected UART report, so sw[15] also acts as a
 // pause switch while a report is being transmitted.
 module basys3_trace_top #(
@@ -36,12 +36,16 @@ module basys3_trace_top #(
     wire        dmem_re;
     wire        dmem_we;
     wire        trace_busy;
-    wire [7:0]  trace_fields = sw[7:0];
+    wire [8:0]  trace_fields = sw[8:0];
     reg [31:0]  cpu_divider_count;
     wire        divider_tick = (CPU_DIVIDER <= 1) ||
                                 (cpu_divider_count >= CPU_DIVIDER - 1);
     wire        cpu_enable = sw[15] && (|trace_fields) && !trace_busy &&
                              divider_tick;
+    wire [1:0]  result_status =
+        (dmem_we && dmem_addr == 32'b0 && dmem_wdata == 32'h600D600D) ? 2'd1 :
+        (dmem_we && dmem_addr == 32'b0 && dmem_wdata == 32'hDEADFA11) ? 2'd2 :
+        2'd0;
 
     initial begin
         for (i = 0; i < IMEM_DEPTH; i = i + 1)
@@ -80,6 +84,7 @@ module basys3_trace_top #(
         .rst(btnC),
         .start(cpu_enable),
         .field_enable(trace_fields),
+        .result_status(result_status),
         .pc(imem_addr),
         .instruction(imem_rdata),
         .data_addr(dmem_addr),
