@@ -16,6 +16,7 @@ module basys3_single_cycle_top #(
     parameter integer IMEM_DEPTH = 1024,
     parameter integer DMEM_DEPTH = 1024,
     parameter integer PERF_LIMIT = 0,
+    parameter integer UART_BAUD_DIV = 868,
     parameter IMEM_FILE = ""
 ) (
     input  wire        clk,
@@ -24,7 +25,8 @@ module basys3_single_cycle_top #(
     output reg  [15:0] led,
     output reg  [6:0]  seg,
     output reg  [3:0]  an,
-    output wire        dp
+    output wire        dp,
+    output wire        uart_tx
 );
     reg [31:0] imem [0:IMEM_DEPTH-1];
     reg [31:0] dmem [0:DMEM_DEPTH-1];
@@ -35,6 +37,7 @@ module basys3_single_cycle_top #(
     reg [31:0] instruction_count;
     reg [31:0] store_count;
     reg        perf_done;
+    reg        perf_done_d;
 
     wire [31:0] imem_addr;
     wire [31:0] imem_rdata;
@@ -47,6 +50,7 @@ module basys3_single_cycle_top #(
     wire        debug_tick;
     wire        cpu_enable;
     wire [3:0]  display_select;
+    wire        report_start;
     reg  [31:0] display_value;
 
     reg [17:0] refresh_count;
@@ -72,6 +76,7 @@ module basys3_single_cycle_top #(
     assign cpu_enable = (DEBUG_MODE != 0) ? debug_tick : !perf_done;
     assign display_select = sw[3:0];
     assign dp = 1'b1;
+    assign report_start = perf_done && !perf_done_d;
 
     cpu u_cpu (
         .clk(clk),
@@ -87,6 +92,18 @@ module basys3_single_cycle_top #(
         .mem_write(dmem_we)
     );
 
+    performance_uart_reporter #(
+        .BAUD_DIV(UART_BAUD_DIV)
+    ) u_performance_uart_reporter (
+        .clk(clk),
+        .rst(btnC),
+        .start_report(report_start),
+        .cycles(cycle_count),
+        .pc(imem_addr),
+        .stores(store_count),
+        .uart_tx(uart_tx)
+    );
+
     always @(posedge clk) begin
         if (btnC) begin
             debug_divider <= {DEBUG_DIV_BITS{1'b0}};
@@ -94,10 +111,12 @@ module basys3_single_cycle_top #(
             instruction_count <= 32'b0;
             store_count <= 32'b0;
             perf_done <= 1'b0;
+            perf_done_d <= 1'b0;
             refresh_count <= 18'b0;
         end else begin
             debug_divider <= debug_divider + 1'b1;
             refresh_count <= refresh_count + 1'b1;
+            perf_done_d <= perf_done;
             if (cpu_enable) begin
                 cycle_count <= cycle_count + 1'b1;
                 instruction_count <= instruction_count + 1'b1;
