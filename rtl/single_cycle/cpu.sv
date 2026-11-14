@@ -2,6 +2,7 @@
 module cpu (
     input  wire        clk,
     input  wire        reset,
+    input  wire        enable,
     input  wire [31:0] instruction,
     input  wire [31:0] mem_read_data,
     output wire [31:0] pc,
@@ -29,7 +30,7 @@ module cpu (
     );
 
     datapath u_datapath (
-        .clk(clk), .reset(reset), .instruction(instruction), .mem_read_data(mem_read_data),
+        .clk(clk), .reset(reset), .enable(enable), .instruction(instruction), .mem_read_data(mem_read_data),
         .alu_op(alu_op), .legal(legal), .reg_write(ctrl_reg_write),
         .mem_read(ctrl_mem_read), .mem_write(ctrl_mem_write), .imm_src(imm_src),
         .operand_a_sel(operand_a_sel), .alu_src(alu_src), .branch(branch),
@@ -39,6 +40,6 @@ module cpu (
         .mem_write_strobe(mem_write_strobe), .pc(pc)
     );
 
-    assign mem_read  = legal && ctrl_mem_read;
-    assign mem_write = legal && ctrl_mem_write;
+    assign mem_read  = enable && legal && ctrl_mem_read;
+    assign mem_write = enable && legal && ctrl_mem_write;
 endmodule

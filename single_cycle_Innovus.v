@@ -303,6 +303,7 @@ endmodule
 module datapath (
     input  wire        clk,
     input  wire        reset,
+    input  wire        enable,
     input  wire [31:0] instruction,
     input  wire [31:0] mem_read_data,
     input  wire [3:0]  alu_op,
@@ -337,7 +338,7 @@ module datapath (
 
     regfile u_regfile (
         .clk(clk), .rs1(rs1), .rs2(rs2), .rd(rd),
-        .write_data(writeback_data), .reg_write(legal && reg_write),
+        .write_data(writeback_data), .reg_write(enable && legal && reg_write),
         .read_data1(rs1_data), .read_data2(rs2_data)
     );
     imm_gen u_imm_gen (.instruction(instruction), .imm_src(imm_src), .imm_value(imm));
@@ -367,7 +368,7 @@ module datapath (
     );
 
     // Gate both memory side effects with a legal decoded instruction.
-    assign mem_write_strobe = (legal && mem_write) ? lsu_wstrb : 4'b0000;
+    assign mem_write_strobe = (enable && legal && mem_write) ? lsu_wstrb : 4'b0000;
 
     assign writeback_data = (legal && jump) ? link_value :
                             (legal && mem_read) ? load_value :
@@ -379,7 +380,7 @@ module datapath (
     assign pc = pc_reg;
     always @(posedge clk) begin
         if (reset) pc_reg <= 32'b0;
-        else       pc_reg <= pc_next;
+        else if (enable) pc_reg <= pc_next;
     end
 endmodule
 
@@ -387,6 +388,7 @@ endmodule
 module cpu (
     input  wire        clk,
     input  wire        reset,
+    input  wire        enable,
     input  wire [31:0] instruction,
     input  wire [31:0] mem_read_data,
     output wire [31:0] pc,
@@ -414,7 +416,7 @@ module cpu (
     );
 
     datapath u_datapath (
-        .clk(clk), .reset(reset), .instruction(instruction), .mem_read_data(mem_read_data),
+        .clk(clk), .reset(reset), .enable(enable), .instruction(instruction), .mem_read_data(mem_read_data),
         .alu_op(alu_op), .legal(legal), .reg_write(ctrl_reg_write),
         .mem_read(ctrl_mem_read), .mem_write(ctrl_mem_write), .imm_src(imm_src),
         .operand_a_sel(operand_a_sel), .alu_src(alu_src), .branch(branch),
@@ -424,8 +426,8 @@ module cpu (
         .mem_write_strobe(mem_write_strobe), .pc(pc)
     );
 
-    assign mem_read  = legal && ctrl_mem_read;
-    assign mem_write = legal && ctrl_mem_write;
+    assign mem_read  = enable && legal && ctrl_mem_read;
+    assign mem_write = enable && legal && ctrl_mem_write;
 endmodule
 
 // Innovus top-level wrapper. The top-level name matches the source filename.
@@ -444,6 +446,7 @@ module single_cycle_Innovus (
     cpu u_cpu (
         .clk(clk),
         .reset(rst),
+        .enable(1'b1),
         .instruction(imem_rdata),
         .mem_read_data(dmem_rdata),
         .pc(imem_addr),

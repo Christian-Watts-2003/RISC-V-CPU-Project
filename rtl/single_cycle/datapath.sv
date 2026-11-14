@@ -3,6 +3,7 @@
 module datapath (
     input  wire        clk,
     input  wire        reset,
+    input  wire        enable,
     input  wire [31:0] instruction,
     input  wire [31:0] mem_read_data,
     input  wire [3:0]  alu_op,
@@ -37,7 +38,7 @@ module datapath (
 
     regfile u_regfile (
         .clk(clk), .rs1(rs1), .rs2(rs2), .rd(rd),
-        .write_data(writeback_data), .reg_write(legal && reg_write),
+        .write_data(writeback_data), .reg_write(enable && legal && reg_write),
         .read_data1(rs1_data), .read_data2(rs2_data)
     );
     imm_gen u_imm_gen (.instruction(instruction), .imm_src(imm_src), .imm_value(imm));
@@ -67,7 +68,7 @@ module datapath (
     );
 
     // Gate both memory side effects with a legal decoded instruction.
-    assign mem_write_strobe = (legal && mem_write) ? lsu_wstrb : 4'b0000;
+    assign mem_write_strobe = (enable && legal && mem_write) ? lsu_wstrb : 4'b0000;
 
     assign writeback_data = (legal && jump) ? link_value :
                             (legal && mem_read) ? load_value :
@@ -79,6 +80,6 @@ module datapath (
     assign pc = pc_reg;
     always @(posedge clk) begin
         if (reset) pc_reg <= 32'b0;
-        else       pc_reg <= pc_next;
+        else if (enable) pc_reg <= pc_next;
     end
 endmodule
