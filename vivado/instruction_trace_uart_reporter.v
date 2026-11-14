@@ -100,7 +100,7 @@ module instruction_trace_uart_reporter #(
                 FIELD_DADDR:  field_length = 5'd15;
                 FIELD_SWDATA: field_length = 5'd16;
                 FIELD_CYCLES:  field_length = 5'd16;
-                FIELD_ICOUNT:  field_length = 5'd15;
+                FIELD_ICOUNT:  field_length = 5'd16;
                 FIELD_STORES:  field_length = 5'd16;
                 FIELD_LDATA:   field_length = 5'd15;
                 FIELD_RESULT:  field_length = 5'd12;
@@ -195,7 +195,7 @@ module instruction_trace_uart_reporter #(
                             4: field_char = "N";
                             5: field_char = "T";
                             6: field_char = "=";
-                            5'd14: field_char = 8'h20;
+                            5'd15: field_char = 8'h20;
                             default: field_char = hex_ascii(hex_nibble(value_instruction_count, position - 7));
                         endcase
                     end
