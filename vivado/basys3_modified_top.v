@@ -36,7 +36,6 @@ module basys3_modified_top #(
                         (divider_count >= CPU_DIVIDER - 1);
     wire core_enable = sw[15] && !trace_busy && divider_tick;
 
-    wire [31:0] instruction_addr;
     wire [31:0] mem_addr;
     wire [31:0] mem_write_data;
     wire [3:0]  mem_write_strobe;
@@ -46,8 +45,11 @@ module basys3_modified_top #(
     wire        retire_valid;
     wire [31:0] retire_pc;
     wire [31:0] retire_instruction;
+    wire dmem_in_range = (DMEM_DEPTH == 256) ?
+        (mem_addr[31:10] == 22'b0) :
+        (mem_addr[31:2] < DMEM_DEPTH);
     wire [31:0] mem_read_data =
-        (mem_read && mem_addr[31:2] < DMEM_DEPTH) ?
+        (mem_read && dmem_in_range) ?
         dmem[mem_addr[31:2]] : 32'b0;
 
     initial begin
@@ -59,10 +61,12 @@ module basys3_modified_top #(
             $readmemh(IMEM_FILE, imem);
     end
 
-    assign instruction_addr = (retire_valid) ? retire_pc : core_pc;
     wire [31:0] core_pc;
+    wire imem_in_range = (IMEM_DEPTH == 1024) ?
+                         (core_pc[31:12] == 20'b0) :
+                         (core_pc[31:2] < IMEM_DEPTH);
     wire [31:0] instruction =
-        (core_pc[1:0] == 2'b00 && core_pc[31:2] < IMEM_DEPTH) ?
+        (core_pc[1:0] == 2'b00 && imem_in_range) ?
         imem[core_pc[31:2]] : 32'b0;
 
     rv32i_multicycle u_cpu (
@@ -160,7 +164,7 @@ module basys3_modified_top #(
     end
 
     always @(posedge clk) begin
-        if (mem_valid && mem_write && mem_addr[31:2] < DMEM_DEPTH) begin
+        if (mem_valid && mem_write && dmem_in_range) begin
             if (mem_write_strobe[0])
                 dmem[mem_addr[31:2]][7:0] <= mem_write_data[7:0];
             if (mem_write_strobe[1])

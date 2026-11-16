@@ -12,6 +12,14 @@ Sources
 - rtl/single_cycle/*.sv
 - vivado/basys3_trace.xdc
 
+Timing constraints
+------------------
+`basys3_trace.xdc` defines `sys_clk` at 100 MHz with a 10 ns period.
+The switches are static user controls, and the LEDs/UART output have no
+synchronous receiving clock on the board, so those board-level paths are
+excluded from the CPU timing summary. Internal register-to-register paths
+remain fully constrained and must meet the 10 ns requirement.
+
 Switch controls
 ---------------
 sw[15] is the run/enable switch. When it is off, the CPU is paused.

@@ -8,6 +8,10 @@ basys3_modified_top
 Use the existing `vivado/basys3_trace.xdc`; the top-level ports are unchanged:
 `clk`, `btnC`, `sw[15:0]`, `led[15:0]`, and `uart_tx`.
 
+The shared XDC creates a 100 MHz `sys_clk` (10 ns period). Board-level switch
+and LED/UART paths are excluded because they have no external synchronous
+clock; internal register-to-register paths remain constrained to 10 ns.
+
 Sources
 -------
 - vivado/basys3_modified_top.v

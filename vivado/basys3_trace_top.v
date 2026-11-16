@@ -60,11 +60,17 @@ module basys3_trace_top #(
             $readmemh(IMEM_FILE, imem);
     end
 
-    assign imem_rdata = (imem_addr[1:0] == 2'b00 &&
-                         imem_addr[31:2] < IMEM_DEPTH) ?
+    wire imem_in_range = (IMEM_DEPTH == 1024) ?
+                         (imem_addr[31:12] == 20'b0) :
+                         (imem_addr[31:2] < IMEM_DEPTH);
+    wire dmem_in_range = (DMEM_DEPTH == 256) ?
+                         (dmem_addr[31:10] == 22'b0) :
+                         (dmem_addr[31:2] < DMEM_DEPTH);
+
+    assign imem_rdata = (imem_addr[1:0] == 2'b00 && imem_in_range) ?
                         imem[imem_addr[31:2]] : 32'b0;
 
-    assign dmem_rdata = (dmem_re && dmem_addr[31:2] < DMEM_DEPTH) ?
+    assign dmem_rdata = (dmem_re && dmem_in_range) ?
                         dmem[dmem_addr[31:2]] : 32'b0;
 
     cpu u_cpu (
@@ -130,7 +136,7 @@ module basys3_trace_top #(
     end
 
     always @(posedge clk) begin
-        if (dmem_we && dmem_addr[31:2] < DMEM_DEPTH) begin
+        if (dmem_we && dmem_in_range) begin
             if (dmem_wstrb[0]) dmem[dmem_addr[31:2]][7:0] <= dmem_wdata[7:0];
             if (dmem_wstrb[1]) dmem[dmem_addr[31:2]][15:8] <= dmem_wdata[15:8];
             if (dmem_wstrb[2]) dmem[dmem_addr[31:2]][23:16] <= dmem_wdata[23:16];

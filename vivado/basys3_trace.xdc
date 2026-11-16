@@ -4,8 +4,10 @@ set_property -dict {PACKAGE_PIN W5 IOSTANDARD LVCMOS33} [get_ports clk]
 create_clock -name sys_clk -period 10.000 [get_ports clk]
 
 set_property -dict {PACKAGE_PIN U18 IOSTANDARD LVCMOS33} [get_ports btnC]
-set_input_delay -clock sys_clk -min 0.000 [get_ports {btnC sw[*]}]
-set_input_delay -clock sys_clk -max 0.000 [get_ports {btnC sw[*]}]
+# The switches and pushbutton are static user controls, not a synchronous
+# interface with a specified external launch clock. Do not include their
+# board-level input timing in the CPU Fmax calculation.
+set_false_path -from [get_ports {btnC sw[*]}]
 
 set_property -dict {PACKAGE_PIN V17 IOSTANDARD LVCMOS33} [get_ports {sw[0]}]
 set_property -dict {PACKAGE_PIN V16 IOSTANDARD LVCMOS33} [get_ports {sw[1]}]
@@ -43,5 +45,6 @@ set_property -dict {PACKAGE_PIN L1 IOSTANDARD LVCMOS33} [get_ports {led[15]}]
 
 set_property -dict {PACKAGE_PIN A18 IOSTANDARD LVCMOS33} [get_ports uart_tx]
 
-set_output_delay -clock sys_clk -min 0.000 [get_ports {led[*] uart_tx}]
-set_output_delay -clock sys_clk -max 0.000 [get_ports {led[*] uart_tx}]
+# LEDs are human-visible indicators and uart_tx is an asynchronous serial
+# stream; neither output has a synchronous receiving clock on the board.
+set_false_path -to [get_ports {led[*] uart_tx}]
