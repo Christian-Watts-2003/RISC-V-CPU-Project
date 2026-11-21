@@ -5,6 +5,8 @@ branch unit, LSU, and register file. It has fetch, decode, execute, optional
 memory, and writeback phases. Instruction memory must supply the word at
 `pc` combinationally. Retirement reports the completed instruction's PC and
 encoding; unsupported encodings, including RV32M, retire without side effects.
+The register file is initialized at startup but is not cleared by reset;
+programs should initialize the registers they use.
 
 Data memory uses aligned word reads and byte strobes. Misaligned halfword and
 word accesses are unsupported. The core holds `mem_valid`, operation,
