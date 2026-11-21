@@ -2,7 +2,8 @@
 
 - The current design is the multi-cycle RV32I core in `CURRENT_multicycle/`.
   `multicycle_MULDIV/` is an independent future-integration copy, not an
-  enabled RV32M implementation. `singlecycle/` is a separate reference.
+  enabled RV32M implementation. `multicycle_MULDIV_test/` is an experimental
+  RV32M integration. `singlecycle/` is a separate reference.
 - Pipeline and older experiments under `legacy/to-be-deleted/` are retained
   for review. Do not remove them permanently without an explicit request.
 - Compile only the relevant project and source set; module names overlap.

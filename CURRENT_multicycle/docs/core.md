@@ -38,5 +38,5 @@ The path above is relative to the repository root; the script itself can be
 invoked by absolute path from elsewhere. It requires `iverilog` and `vvp`,
 compiles only this project's RTL, and prints retirement, memory, pause, and
 register checks. It covers RV32I operations, taken and untaken control flow,
-illegal/RV32M NOPs, x0, memory waits and enable pauses, with a timeout. It has
-not been run as part of this cleanup; the owner will run it locally.
+illegal/RV32M NOPs, x0, memory waits and enable pauses, with a timeout. The
+owner reported a passing Vivado run with 45 retirements, 5 reads and 3 writes.

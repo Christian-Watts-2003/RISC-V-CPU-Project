@@ -10,6 +10,7 @@ report is not in this repository.
 |---|---|
 | [CURRENT_multicycle](CURRENT_multicycle/docs/core.md) | Current multi-cycle RV32I core, testbench, and Basys3 trace wrapper. |
 | [multicycle_MULDIV](multicycle_MULDIV/docs/core.md) | Independent copy of the current core with the existing MulDiv source retained for future integration; RV32M is not enabled. |
+| [multicycle_MULDIV_test](multicycle_MULDIV_test/docs/core.md) | Separate experimental RV32M integration with a directed testbench and Basys3 synthesis top. |
 | [singlecycle](singlecycle/docs/core.md) | Independent single-cycle RTL, tests, board files, and separate Innovus source. |
 | [legacy/to-be-deleted](legacy/to-be-deleted/README.md) | Pipeline, optimization experiments, superseded files, and old documents retained for review, not deleted. |
 
@@ -24,6 +25,6 @@ bash CURRENT_multicycle/scripts/test_multicycle.sh
 ```
 
 See the project documentation for source lists, memory behavior, known
-limitations, and Vivado image paths. The testbench has not been run as part
-of this cleanup. The general [RV32I instruction reference](docs/isa_reference.md)
+limitations, and Vivado image paths. The owner reported a passing run of
+the current multi-cycle testbench in Vivado. The general [RV32I instruction reference](docs/isa_reference.md)
 and [MIT license](LICENSE) remain at the repository level.
