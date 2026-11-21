@@ -1,0 +1,46 @@
+# Current multi-cycle RV32I core
+
+`rtl/rv32i_multicycle.sv` uses the local controller, immediate generator, ALU,
+branch unit, LSU, and register file. It has fetch, decode, execute, optional
+memory, and writeback phases. Instruction memory must supply the word at
+`pc` combinationally. Retirement reports the completed instruction's PC and
+encoding; unsupported encodings, including RV32M, retire without side effects.
+The register file is initialized at startup but is not cleared by reset;
+programs should initialize the registers they use.
+
+Data memory uses aligned word reads and byte strobes. Misaligned halfword and
+word accesses are unsupported. The core holds `mem_valid`, operation,
+address, write data and strobes during a wait. **An external memory must
+accept a transaction only when `enable && mem_valid && mem_ready` is true on
+the clock edge**: the core does not advance when `enable` is low, even if
+`mem_ready` is high. This is not an ordinary independent valid/ready
+handshake.
+
+The Basys3 wrapper ties ready high and gates RAM writes and memory accounting
+with the core enable, preventing repeated acceptance while paused. See
+[board setup](../board/BASYS3_MODIFIED_README.txt) for trace and performance
+mode controls, counter semantics and Vivado ROM configuration.
+
+The owner reports that this core has been verified and meets timing; the
+timing report is not included. No new timing measurement is claimed.
+
+## Local test
+
+From the repository root:
+
+```sh
+bash CURRENT_multicycle/scripts/test_multicycle.sh
+```
+
+The path above is relative to the repository root; the script itself can be
+invoked by absolute path from elsewhere. It requires `iverilog` and `vvp`,
+compiles only this project's RTL, and prints retirement, memory, pause, and
+register checks. It covers RV32I operations, taken and untaken control flow,
+illegal/RV32M NOPs, x0, memory waits and enable pauses, with a timeout. The
+owner reported a passing Vivado run with 45 retirements, 5 reads and 3 writes.
+
+For board reporting checks, add the local `rtl/*.sv` and `board/*.v` as design
+sources and set `sim/board_modes_tb.sv` as the simulation top. It checks
+performance counters, pass/fail summaries, paused stores and trace pauses.
+`sim/performance_summary_tb.sv` separately checks decimal formatting,
+including 64-bit values. These new testbenches have not yet been simulated.
