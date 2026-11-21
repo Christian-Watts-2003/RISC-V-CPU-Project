@@ -29,12 +29,24 @@ module basys3_modified_top #(
     reg [1:0]  trace_result_status;
     reg [1:0]  trace_test_status;
     reg [31:0] trace_test_id;
+    reg performance_mode;
+    reg performance_done;
+    reg finish_pending;
+    reg [1:0] performance_status;
+    reg performance_start;
+    reg [63:0] performance_cycles;
+    reg [63:0] performance_retired;
+    reg [63:0] performance_loads;
+    reg [63:0] performance_stores;
+    reg [63:0] performance_waits;
 
     wire [10:0] trace_fields = {1'b1, 1'b1, sw[8:0]};
     wire trace_busy;
+    wire trace_uart_tx;
+    wire performance_uart_tx;
     wire divider_tick = (CPU_DIVIDER <= 1) ||
                         (divider_count >= CPU_DIVIDER - 1);
-    wire core_enable = sw[15] && !trace_busy && divider_tick;
+    wire memory_ready = 1'b1;
 
     wire [31:0] mem_addr;
     wire [31:0] mem_write_data;
@@ -45,6 +57,9 @@ module basys3_modified_top #(
     wire        retire_valid;
     wire [31:0] retire_pc;
     wire [31:0] retire_instruction;
+    wire core_enable = !btnC && sw[15] && divider_tick &&
+                       (performance_mode ? (!performance_done &&
+                        !(finish_pending && retire_valid)) : !trace_busy);
     wire dmem_in_range = (DMEM_DEPTH == 256) ?
         (mem_addr[31:10] == 22'b0) :
         (mem_addr[31:2] < DMEM_DEPTH);
@@ -75,7 +90,7 @@ module basys3_modified_top #(
         .enable(core_enable),
         .instruction(instruction),
         .mem_read_data(mem_read_data),
-        .mem_ready(1'b1),
+        .mem_ready(memory_ready),
         .pc(core_pc),
         .mem_addr(mem_addr),
         .mem_write_data(mem_write_data),
@@ -93,7 +108,7 @@ module basys3_modified_top #(
     ) u_trace_reporter (
         .clk(clk),
         .rst(btnC),
-        .start(retire_valid && sw[15]),
+        .start(retire_valid && sw[15] && !performance_mode),
         .field_enable(trace_fields),
         .result_status(trace_result_status),
         .test_status(trace_test_status),
@@ -106,10 +121,25 @@ module basys3_modified_top #(
         .instruction_count(instruction_count + 32'd1),
         .store_count(store_count),
         .load_data(trace_load_data),
-        .uart_tx(uart_tx),
+        .uart_tx(trace_uart_tx),
         .busy(trace_busy)
     );
 
+    performance_summary_uart #(.BAUD_DIV(UART_BAUD_DIV)) u_performance_reporter (
+        .clk(clk),
+        .rst(btnC),
+        .start(performance_start),
+        .result_status(performance_status),
+        .cycles(performance_cycles),
+        .retired(performance_retired),
+        .loads(performance_loads),
+        .stores(performance_stores),
+        .waits(performance_waits),
+        .uart_tx(performance_uart_tx),
+        .busy()
+    );
+
+    assign uart_tx = performance_mode ? performance_uart_tx : trace_uart_tx;
     assign led = core_pc[15:0];
 
     always @(posedge clk) begin
@@ -124,8 +154,19 @@ module basys3_modified_top #(
             trace_result_status <= 2'b0;
             trace_test_status <= 2'b0;
             trace_test_id <= 32'b0;
+            performance_mode <= sw[14];
+            performance_done <= 1'b0;
+            finish_pending <= 1'b0;
+            performance_status <= 2'b0;
+            performance_start <= 1'b0;
+            performance_cycles <= 64'b0;
+            performance_retired <= 64'b0;
+            performance_loads <= 64'b0;
+            performance_stores <= 64'b0;
+            performance_waits <= 64'b0;
         end else begin
-            if (!sw[15] || trace_busy) begin
+            performance_start <= 1'b0;
+            if (!sw[15] || (!performance_mode && trace_busy) || performance_done) begin
                 divider_count <= 32'b0;
             end else if (divider_tick) begin
                 divider_count <= 32'b0;
@@ -138,7 +179,7 @@ module basys3_modified_top #(
             if (retire_valid && sw[15])
                 instruction_count <= instruction_count + 32'd1;
 
-            if (mem_valid && mem_write) begin
+            if (core_enable && mem_valid && memory_ready && mem_write) begin
                 trace_data_addr <= mem_addr;
                 trace_store_data <= mem_write_data;
                 store_count <= store_count + 32'd1;
@@ -152,7 +193,7 @@ module basys3_modified_top #(
                     2'd0;
                 trace_test_id <= mem_write_data;
             end
-            if (mem_valid && mem_read) begin
+            if (core_enable && mem_valid && memory_ready && mem_read) begin
                 trace_data_addr <= mem_addr;
                 trace_load_data <= mem_read_data;
             end
@@ -160,11 +201,36 @@ module basys3_modified_top #(
                 trace_result_status <= 2'b0;
                 trace_test_status <= 2'b0;
             end
+
+            if (performance_mode && !performance_done) begin
+                if (core_enable) begin
+                    performance_cycles <= performance_cycles + 1'b1;
+                    if (mem_valid && !memory_ready)
+                        performance_waits <= performance_waits + 1'b1;
+                    if (mem_valid && memory_ready && mem_read)
+                        performance_loads <= performance_loads + 1'b1;
+                    if (mem_valid && memory_ready && mem_write) begin
+                        performance_stores <= performance_stores + 1'b1;
+                        if (mem_addr == 0 && mem_write_strobe == 4'b1111 &&
+                            (mem_write_data == 32'h600D600D ||
+                             mem_write_data == 32'hDEADFA11)) begin
+                            finish_pending <= 1'b1;
+                            performance_status <= (mem_write_data == 32'h600D600D) ? 2'd1 : 2'd2;
+                        end
+                    end
+                end
+                if (retire_valid)
+                    performance_retired <= performance_retired + 1'b1;
+                if (finish_pending && retire_valid) begin
+                    performance_done <= 1'b1;
+                    performance_start <= 1'b1;
+                end
+            end
         end
     end
 
     always @(posedge clk) begin
-        if (mem_valid && mem_write && dmem_in_range) begin
+        if (core_enable && mem_valid && memory_ready && mem_write && dmem_in_range) begin
             if (mem_write_strobe[0])
                 dmem[mem_addr[31:2]][7:0] <= mem_write_data[7:0];
             if (mem_write_strobe[1])

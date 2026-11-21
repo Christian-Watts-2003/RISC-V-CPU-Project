@@ -16,12 +16,10 @@ the clock edge**: the core does not advance when `enable` is low, even if
 `mem_ready` is high. This is not an ordinary independent valid/ready
 handshake.
 
-The existing Basys3 wrapper ties ready high but does not gate RAM writes or
-store counting with the core enable. A store held during a pause or divider
-interval can therefore be written and counted repeatedly. Ordinary RAM
-repeatedly receives the same data, but counts and side-effecting devices are
-not safe. This cleanup preserves that behavior; account for it when using
-the wrapper. See [board setup](../board/BASYS3_MODIFIED_README.txt).
+The Basys3 wrapper ties ready high and gates RAM writes and memory accounting
+with the core enable, preventing repeated acceptance while paused. See
+[board setup](../board/BASYS3_MODIFIED_README.txt) for trace and performance
+mode controls, counter semantics and Vivado ROM configuration.
 
 The owner reports that this core has been verified and meets timing; the
 timing report is not included. No new timing measurement is claimed.
@@ -40,3 +38,9 @@ compiles only this project's RTL, and prints retirement, memory, pause, and
 register checks. It covers RV32I operations, taken and untaken control flow,
 illegal/RV32M NOPs, x0, memory waits and enable pauses, with a timeout. The
 owner reported a passing Vivado run with 45 retirements, 5 reads and 3 writes.
+
+For board reporting checks, add the local `rtl/*.sv` and `board/*.v` as design
+sources and set `sim/board_modes_tb.sv` as the simulation top. It checks
+performance counters, pass/fail summaries, paused stores and trace pauses.
+`sim/performance_summary_tb.sv` separately checks decimal formatting,
+including 64-bit values. These new testbenches have not yet been simulated.

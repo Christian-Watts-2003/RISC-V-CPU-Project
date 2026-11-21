@@ -8,8 +8,8 @@ operations are enabled. The existing unit asserts `valid` with `start`; it
 is not an iterative handshake. Instruction cycle counts are unchanged.
 
 The divider and remainder are combinational. Their resource use and delay
-may be substantial and may not meet 100 MHz. This integration is not yet
-verified or timing-qualified. The original `CURRENT_multicycle/` and dormant
+may be substantial and may not meet 100 MHz. Directed simulation passed as
+reported by the owner; timing has not been qualified. The original `CURRENT_multicycle/` and dormant
 `multicycle_MULDIV/` remain unchanged.
 
 As in the original core, memory requests remain asserted while `enable` is
@@ -31,7 +31,14 @@ The separate `sim/multicycle_tb.sv` retains the earlier RV32I regression
 with its M-as-NOP case replaced by an illegal encoding. Select
 `multicycle_tb` as simulation top to run it separately. The scripts
 `scripts/test_muldiv.sh` and `scripts/test_multicycle.sh` are optional local
-Icarus alternatives; neither simulation has been run as part of this change.
+Icarus alternatives. The owner reported a passing Vivado run of
+`muldiv_integration_tb` with 33 retirements, 1 read, and 1 write.
+
+For board reporting checks, add local `rtl/*.sv` and `board/*.v` as design
+sources and set `sim/board_modes_tb.sv` as simulation top. It checks
+performance counters, pass/fail summaries, paused stores and trace pauses.
+`sim/performance_summary_tb.sv` separately checks decimal formatting,
+including 64-bit values. These new tests have not yet been simulated.
 
 ## Synthesis and implementation
 
