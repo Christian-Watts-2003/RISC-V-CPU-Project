@@ -2,14 +2,14 @@ SINGLE-CYCLE INNOVUS RTL SOURCE
 
 Source
 ------
-single_cycle_Innovus.v
+innovus/single_cycle_Innovus.v (relative to the singlecycle directory)
 
 Top module
 ----------
 single_cycle_Innovus
 
 This is a unified CPU-only RTL source for Innovus compilation. It contains
-the maintained single-cycle controller, datapath, ALU, branch unit, immediate
+its own single-cycle controller, datapath, ALU, branch unit, immediate
 generator, LSU, multiply/divide unit, and register file in one Verilog source.
 
 Instruction and data memories are external. The wrapper ports are:
@@ -30,6 +30,7 @@ not add the testbenches or the behavioral memory module to the Innovus RTL
 source set.
 
 The register file has no reset and must be initialized by the surrounding
-system or by the program/test environment. The current single-cycle RV32M
+system or by the program/test environment. This source's RV32M
 implementation uses combinational multiplication and division, so those
-operations are part of the synthesized critical path.
+operations are part of the synthesized critical path. Its decoder enables
+RV32M, unlike the separate modular single-cycle RTL.

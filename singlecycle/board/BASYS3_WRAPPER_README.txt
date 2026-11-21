@@ -6,11 +6,15 @@ basys3_single_cycle_top
 
 Sources
 -------
-- single_cycle_Innovus.v
-- vivado/basys3_single_cycle_top.v
-- vivado/uart_tx.v
-- vivado/performance_uart_reporter.v
-- vivado/basys3_single_cycle.xdc
+- innovus/single_cycle_Innovus.v
+- board/basys3_single_cycle_top.v
+- board/uart_tx.v
+- board/performance_uart_reporter.v
+- board/basys3_single_cycle.xdc
+
+Paths above are relative to the singlecycle project directory. This source
+set uses the Innovus bundle's RV32M-enabled cpu, not the modular controller.
+Do not compile the Innovus bundle together with rtl/*.sv.
 
 Configuration
 -------------
@@ -61,3 +65,6 @@ Included board test image
 image covering the maintained instruction subset and documented edge cases.
 It writes `600D600D` to data memory address 0 on success or `DEADFA11` on
 failure. Set `sw[3:0]` to 7 after the run to display the low 16-bit marker.
+The default IMEM_FILE is relative to the project root; use an absolute
+path if Vivado uses another working directory and include the HEX file as a
+memory source where required.

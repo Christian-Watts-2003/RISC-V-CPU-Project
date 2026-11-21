@@ -1,75 +1,29 @@
-# RISC-V Single-Cycle Processor
+# RISC-V CPU project
 
-A RISC-V RV32I processor implementation on FPGA, designed as a master's thesis project to explore power-efficient CPU architectures for AI workloads.
+The active design is a multi-cycle RV32I CPU targeting the Basys3 FPGA. The
+owner reports that this design has been verified and meets timing; the timing
+report is not in this repository.
 
-## Project Goals
+## Project directories
 
-- Implement a complete single-cycle RISC-V RV32I processor
-- Extend to pipelined architecture with hazard detection
-- Explore power optimization techniques (dynamic voltage scaling, power gating)
-- Target: Xilinx Basys3 FPGA
+| Directory | Purpose |
+|---|---|
+| [CURRENT_multicycle](CURRENT_multicycle/docs/core.md) | Current multi-cycle RV32I core, testbench, and Basys3 trace wrapper. |
+| [multicycle_MULDIV](multicycle_MULDIV/docs/core.md) | Independent copy of the current core with the existing MulDiv source retained for future integration; RV32M is not enabled. |
+| [singlecycle](singlecycle/docs/core.md) | Independent single-cycle RTL, tests, board files, and separate Innovus source. |
+| [legacy/to-be-deleted](legacy/to-be-deleted/README.md) | Pipeline, optimization experiments, superseded files, and old documents retained for review, not deleted. |
 
-## Architecture Overview
+Each project contains its own RTL, simulation assets, board files, scripts,
+and documentation. Compile one project and one specified source set at a
+time: module names are reused across projects and the Innovus bundle.
 
-### Current Status: ALU Development
+To run the new test locally with Icarus Verilog:
 
-- [x] ALU module (add, sub, and, or, xor, slt, shifts)
-- [ ] Register file
-- [ ] Instruction memory
-- [ ] Data memory
-- [ ] Control unit
-- [ ] Datapath integration
-- [ ] Single-cycle CPU
-- [ ] Pipelined CPU (Phase 2)
-
-## Repository Structure
-
-- `rtl/single_cycle/` - maintained single-cycle implementation.
-- `rtl/pipeline/` - five-stage pipeline implementation scaffold.
-- `rtl/optimized/` - experimental optimization variants.
-- `sim/Single Cycle TBs/` - maintained single-cycle testbenches.
-- `legacy files/` - superseded RTL and testbenches retained for reference.
-- `docs/` - project specifications and design documentation.
-- `scripts/` - repeatable simulation helpers.
-
-## Building & Simulation
-
-### Prerequisites
-
-- Vivado 2023.1+ (WebPACK free version)
-- ModelSim or Vivado Simulator (for testbenches)
-- SystemVerilog knowledge
-
-### Running Simulations
-
-```bash
-# In Vivado, add only rtl/single_cycle/*.sv as design sources and
-# sim/Single Cycle TBs/single_cycle_tb.sv as the simulation source.
-# 4. Run simulation
-
-# Or via command line:
-vlog rtl/single_cycle/*.sv "sim/Single Cycle TBs/single_cycle_tb.sv"
-vsim single_cycle_tb
-run -all
+```sh
+bash CURRENT_multicycle/scripts/test_multicycle.sh
 ```
 
-## Design Details
-
-See [docs/design.md](docs/design.md) for detailed architecture documentation.
-
-See [docs/isa_reference.md](docs/isa_reference.md) for RISC-V instruction set reference.
-
-## Author
-
-Christian Watts\
-B.S. in Electrical Engineering from The University of Alabama\
-Master's Student, Electrical Engineering at UT San Antonio
-## License
-
-MIT License - See [LICENSE](LICENSE) file
-
-## References
-
-- Harris & Harris - "Digital Design and Computer Architecture: RISC-V Edition"
-- RISC-V Specification - https://riscv.org/technical/specifications/
-- Xilinx Basys3 Board - https://digilent.com/shop/basys-3-artix-7-fpga-trainer-board/
+See the project documentation for source lists, memory behavior, known
+limitations, and Vivado image paths. The testbench has not been run as part
+of this cleanup. The general [RV32I instruction reference](docs/isa_reference.md)
+and [MIT license](LICENSE) remain at the repository level.

@@ -17,7 +17,7 @@ module basys3_single_cycle_top #(
     parameter integer DMEM_DEPTH = 1024,
     parameter integer PERF_LIMIT = 100000,
     parameter integer UART_BAUD_DIV = 868,
-    parameter IMEM_FILE = "C:/Users/watts/RISC-V-CPU-Project/sim/test_programs/basys3_rv32im_edgecase.hex"
+    parameter IMEM_FILE = "sim/test_programs/basys3_rv32im_edgecase.hex"
 ) (
     input  wire        clk,
     input  wire        btnC,

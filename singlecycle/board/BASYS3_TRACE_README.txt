@@ -6,11 +6,14 @@ basys3_trace_top
 
 Sources
 -------
-- vivado/basys3_trace_top.v
-- vivado/instruction_trace_uart_reporter.v
-- vivado/uart_tx.v
-- rtl/single_cycle/*.sv
-- vivado/basys3_trace.xdc
+- board/basys3_trace_top.v
+- board/instruction_trace_uart_reporter.v
+- board/uart_tx.v
+- rtl/*.sv
+- board/basys3_trace.xdc
+
+Paths above are relative to the singlecycle project directory. Do not compile
+the separate Innovus bundle together with modular RTL.
 
 Timing constraints
 ------------------
@@ -62,9 +65,10 @@ The RV32I image also assigns each check a test number. Passing checks emit
 with its test number before the overall `RESULT=FAIL` marker. Test events use
 reserved data addresses `0x100` and `0x104` and are handled by the wrapper.
 
-The instruction ROM is initialized from IMEM_FILE. The default path is the
-existing Basys3 test image; set the parameter or manage the HEX file in the
-Vivado project if the path differs on the host machine.
+The instruction ROM is initialized from IMEM_FILE. The default is relative to
+the project root; set IMEM_FILE to the absolute path of this project's
+sim/test_programs/basys3_rv32i_edgecase.hex if Vivado uses another working
+directory, and include the HEX file as a memory source where required.
 
 The LEDs display the low 16 bits of the current PC. The center button is a
 synchronous reset.
