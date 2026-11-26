@@ -10,6 +10,7 @@ report is not in this repository.
 |---|---|
 | [CURRENT_multicycle](CURRENT_multicycle/docs/core.md) | Current multi-cycle RV32I core, testbench, and Basys3 trace wrapper. |
 | [OPTIMIZED_multicycle](OPTIMIZED_multicycle/docs/core.md) | Independent RV32I predecode and OR-selection experiment with switchable configurations. |
+| [innovus/multicycle](innovus/multicycle/README.md) | Standalone CPU-only Verilog sources for four multicycle ASIC comparisons. |
 | [multicycle_MULDIV](multicycle_MULDIV/docs/core.md) | Independent copy of the current core with the existing MulDiv source retained for future integration; RV32M is not enabled. |
 | [multicycle_MULDIV_test](multicycle_MULDIV_test/docs/core.md) | Separate experimental RV32M integration with a directed testbench and Basys3 synthesis top. |
 | [singlecycle](singlecycle/docs/core.md) | Independent single-cycle RTL, tests, board files, and separate Innovus source. |
